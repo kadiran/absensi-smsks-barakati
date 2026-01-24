@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Absensi Online</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+<img src="logo.png" width="90">
+<h2>ABSENSI ONLINE</h2>
+<p>SMSKS Barakati Muna Barat</p>
+</header>
+
+<div class="container">
+
+<label>Jenis Pegawai</label>
+<select id="jenis">
+  <option value="">-- Pilih --</option>
+  <option>Kepala Sekolah</option>
+  <option>Guru</option>
+  <option>Guru Mapel</option>
+  <option>TU</option>
+</select>
+
+<label>Status Kepegawaian</label>
+<select id="status_kepegawaian">
+  <option value="">-- Pilih --</option>
+  <option>PNS</option>
+  <option>PPPK</option>
+  <option>PPPK Paruh Waktu</option>
+  <option>GTY</option>
+  <option>PTY</option>
+  <option>Guru Honor Sekolah</option>
+</select>
+
+<label>NIP / NIK</label>
+<input id="nik">
+
+<label>Nama</label>
+<input id="nama">
+
+<label>Status Kehadiran</label>
+<select id="status">
+  <option value="">-- Pilih --</option>
+  <option>Hadir</option>
+  <option>Sakit</option>
+  <option>Izin</option>
+</select>
+
+<label>Keterangan</label>
+<textarea id="keterangan"></textarea>
+
+<label>Foto Selfie</label>
+<video id="video" autoplay></video>
+<button onclick="ambilFoto()">📸 Ambil Foto</button>
+<canvas id="foto" hidden></canvas>
+<img id="hasilFoto">
+
+<label>Tanda Tangan</label>
+<canvas id="ttd" height="200"></canvas>
+<button onclick="hapusTTD()">Ulangi TTD</button>
+
+<label>Lokasi</label>
+<input id="lokasi" readonly>
+<button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
+
+<button onclick="kirim(this)">✅ SIMPAN</button>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
