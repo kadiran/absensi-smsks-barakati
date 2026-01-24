@@ -1,4 +1,4 @@
-﻿/*************************************************
+/*************************************************
  * KONFIGURASI
  *************************************************/
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbz8KcWKDqf0Ovfna4GtqyouQ7gDhhAOhaelaiZLA6aBVUZCKGs63Cr42SUm13AWTFDi/exec"; // wajib diganti
