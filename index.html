@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <header>
 <img src="logo.png" width="90">
 <h2>ABSENSI ONLINE</h2>
@@ -14,7 +15,8 @@
 </header>
 
 <div class="container">
-<label>Jenis Pegawai *</label>
+
+<label>Jenis Pegawai</label>
 <select id="jenis">
   <option value="">-- Pilih --</option>
   <option>Kepala Sekolah</option>
@@ -23,7 +25,7 @@
   <option>TU</option>
 </select>
 
-<label>Status Kepegawaian *</label>
+<label>Status Kepegawaian</label>
 <select id="status_kepegawaian">
   <option value="">-- Pilih --</option>
   <option>PNS</option>
@@ -34,38 +36,39 @@
   <option>Guru Honor Sekolah</option>
 </select>
 
-<label>NIP / NIK *</label>
-<input id="nik" placeholder="Masukkan NIP/NIK">
+<label>NIP / NIK</label>
+<input id="nik">
 
-<label>Nama *</label>
-<input id="nama" placeholder="Masukkan nama lengkap">
+<label>Nama</label>
+<input id="nama">
 
-<label>Status Kehadiran *</label>
-<select id="status">
+<label>Status Kehadiran</label>
+<select id="status" required>
   <option value="">-- Pilih --</option>
   <option value="Hadir">Hadir</option>
   <option value="Sakit">Sakit</option>
   <option value="Izin">Izin</option>
 </select>
 
-<label>Keterangan (Wajib jika Sakit)</label>
+<label>Keterangan (Wajib jika Sakit/Izin)</label>
 <textarea id="keterangan"></textarea>
 
-<label>Foto Selfie *</label>
+<label>Foto Selfie</label>
 <video id="video" autoplay></video>
-<button id="btnFoto" onclick="ambilFoto()">📸 Ambil Foto</button>
+<button onclick="ambilFoto()">📸 Ambil Foto</button>
 <canvas id="foto" hidden></canvas>
 <img id="hasilFoto">
 
-<label>Tanda Tangan *</label>
+<label>Tanda Tangan</label>
 <canvas id="ttd" height="200"></canvas>
-<button id="btnTTD" onclick="hapusTTD()">Ulangi TTD</button>
+<button onclick="hapusTTD()">Ulangi TTD</button>
 
-<label>Lokasi *</label>
+<label>Lokasi</label>
 <input id="lokasi" readonly>
 <button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
 
-<button id="btnKirim" onclick="kirim(this)">✅ SIMPAN</button>
+<button onclick="kirim(this)">✅ SIMPAN</button>
+
 </div>
 
 <script src="script.js"></script>
