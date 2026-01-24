@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <header>
 <img src="logo.png" width="90">
 <h2>ABSENSI ONLINE</h2>
@@ -15,7 +14,6 @@
 </header>
 
 <div class="container">
-
 <label>Jenis Pegawai *</label>
 <select id="jenis">
   <option value="">-- Pilih --</option>
@@ -51,11 +49,11 @@
 </select>
 
 <label>Keterangan (Wajib jika Sakit)</label>
-<textarea id="keterangan" placeholder="Isi keterangan jika sakit"></textarea>
+<textarea id="keterangan"></textarea>
 
 <label>Foto Selfie *</label>
 <video id="video" autoplay></video>
-<button id="btnFoto" onclick="ambilFoto()" disabled>📸 Ambil Foto</button>
+<button id="btnFoto" onclick="ambilFoto()">📸 Ambil Foto</button>
 <canvas id="foto" hidden></canvas>
 <img id="hasilFoto">
 
@@ -65,10 +63,9 @@
 
 <label>Lokasi *</label>
 <input id="lokasi" readonly>
-<button id="btnLokasi" onclick="ambilLokasi()">📍 Ambil Lokasi</button>
+<button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
 
-<button id="btnKirim" onclick="kirim(this)" disabled>✅ SIMPAN ABSENSI</button>
-
+<button id="btnKirim" onclick="kirim(this)">✅ SIMPAN</button>
 </div>
 
 <script src="script.js"></script>
