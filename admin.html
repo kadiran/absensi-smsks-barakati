@@ -1,80 +1,54 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Absensi</title>
-
 <link rel="stylesheet" href="style.css">
 
-<!-- jsPDF & AutoTable -->
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="admin.js"></script>
 </head>
-
 <body>
 
 <header>
-  <img src="logo.png" width="70"><br>
-  <b>ADMIN ABSENSI</b><br>
-  SMSKS Barakati Muna Barat
+<img src="logo.png" width="70">
+<b>ADMIN ABSENSI</b>
+<p>SMSKS Barakati Muna Barat</p>
 </header>
 
 <div class="container">
+<label>Bulan:</label>
+<select id="bulan"></select>
 
-  <!-- FILTER -->
-  <label>Bulan</label>
-  <select id="bulan">
-    <option value="">-- Pilih Bulan --</option>
-    <option value="1">Januari</option>
-    <option value="2">Februari</option>
-    <option value="3">Maret</option>
-    <option value="4">April</option>
-    <option value="5">Mei</option>
-    <option value="6">Juni</option>
-    <option value="7">Juli</option>
-    <option value="8">Agustus</option>
-    <option value="9">September</option>
-    <option value="10">Oktober</option>
-    <option value="11">November</option>
-    <option value="12">Desember</option>
-  </select>
+<label>Tahun:</label>
+<input type="number" id="tahun" value="2026">
 
-  <label>Tahun</label>
-  <input type="number" id="tahun" value="2026">
+<label>Nama:</label>
+<select id="filterNama">
+<option value="">Semua</option>
+</select>
 
-  <button onclick="loadData()">🔍 Tampilkan Data</button>
-  <button onclick="cetakPDF()">📄 Cetak PDF Bulanan</button>
+<button onclick="filterData()">🔍 Tampilkan</button>
+<button onclick="loadData()">🔄 Refresh</button>
+<button onclick="cetakPDFBulanan()">📄 CETAK PDF BULANAN</button>
 
-  <hr>
-
-  <!-- TABEL -->
-  <table id="tabel" border="1" width="100%">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Tanggal</th>
-        <th>Jenis</th>
-        <th>NIP / NIK</th>
-        <th>Nama</th>
-        <th>Status</th>
-        <th>Keterangan</th>
-        <th>Lokasi</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- diisi oleh admin.js -->
-    </tbody>
-  </table>
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>No</th>
+<th>Tanggal</th>
+<th>Nama</th>
+<th>Status Kehadiran</th>
+<th>Status Kepegawaian</th>
+<th>Keterangan</th>
+</tr>
+</thead>
+<tbody id="data"></tbody>
+</table>
 
 </div>
-
-<footer>
-  © 2026 SMSKS Barakati Muna Barat
-</footer>
-
-<!-- SCRIPT ADMIN -->
-<script src="admin.js"></script>
-
 </body>
 </html>
