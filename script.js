@@ -1,4 +1,4 @@
-const SHEET_URL="https://script.google.com/macros/s/AKfycbycIs4AiE9q4Zujzi-pjGrsomigWMQGmN6UmW9cTQ5aqjvzjUy2LH15KIRCbB0vWmrd/exec";
+const SHEET_URL="https://script.google.com/macros/s/AKfycbx4eOGm2In5gnjG6Vh3WDAS7x69ON36j_pes5K-AhbdPcy3RlpIk9xfM6G-2uQPNlzN/exec";
 
 const video=document.getElementById("video");
 const canvasFoto=document.getElementById("foto");
