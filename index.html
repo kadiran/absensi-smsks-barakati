@@ -16,7 +16,7 @@
 
 <div class="container">
 
-<label>Jenis Pegawai</label>
+<label>Jenis Pegawai *</label>
 <select id="jenis">
   <option value="">-- Pilih --</option>
   <option>Kepala Sekolah</option>
@@ -25,7 +25,7 @@
   <option>TU</option>
 </select>
 
-<label>Status Kepegawaian</label>
+<label>Status Kepegawaian *</label>
 <select id="status_kepegawaian">
   <option value="">-- Pilih --</option>
   <option>PNS</option>
@@ -36,13 +36,13 @@
   <option>Guru Honor Sekolah</option>
 </select>
 
-<label>NIP / NIK</label>
-<input id="nik">
+<label>NIP / NIK *</label>
+<input id="nik" placeholder="Masukkan NIP/NIK">
 
-<label>Nama</label>
-<input id="nama">
+<label>Nama *</label>
+<input id="nama" placeholder="Masukkan nama lengkap">
 
-<label>Status Kehadiran</label>
+<label>Status Kehadiran *</label>
 <select id="status">
   <option value="">-- Pilih --</option>
   <option value="Hadir">Hadir</option>
@@ -50,24 +50,24 @@
   <option value="Izin">Izin</option>
 </select>
 
-<label>Keterangan</label>
-<textarea id="keterangan" placeholder="Wajib jika Sakit"></textarea>
+<label>Keterangan (Wajib jika Sakit)</label>
+<textarea id="keterangan" placeholder="Isi keterangan jika sakit"></textarea>
 
-<label>Foto Selfie</label>
+<label>Foto Selfie *</label>
 <video id="video" autoplay></video>
-<button id="btnFoto" onclick="ambilFoto()">📸 Ambil Foto</button>
+<button id="btnFoto" onclick="ambilFoto()" disabled>📸 Ambil Foto</button>
 <canvas id="foto" hidden></canvas>
 <img id="hasilFoto">
 
-<label>Tanda Tangan</label>
+<label>Tanda Tangan *</label>
 <canvas id="ttd" height="200"></canvas>
-<button onclick="hapusTTD()">Ulangi TTD</button>
+<button id="btnTTD" onclick="hapusTTD()">Ulangi TTD</button>
 
-<label>Lokasi</label>
+<label>Lokasi *</label>
 <input id="lokasi" readonly>
-<button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
+<button id="btnLokasi" onclick="ambilLokasi()">📍 Ambil Lokasi</button>
 
-<button onclick="kirim(this)">✅ SIMPAN ABSENSI</button>
+<button id="btnKirim" onclick="kirim(this)" disabled>✅ SIMPAN ABSENSI</button>
 
 </div>
 
