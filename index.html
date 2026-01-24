@@ -43,20 +43,19 @@
 <input id="nama">
 
 <label>Status Kehadiran</label>
-<select id="status" required>
+<select id="status">
   <option value="">-- Pilih --</option>
   <option value="Hadir">Hadir</option>
   <option value="Sakit">Sakit</option>
   <option value="Izin">Izin</option>
 </select>
 
-
 <label>Keterangan</label>
-<textarea id="keterangan"></textarea>
+<textarea id="keterangan" placeholder="Wajib jika Sakit"></textarea>
 
 <label>Foto Selfie</label>
 <video id="video" autoplay></video>
-<button onclick="ambilFoto()">📸 Ambil Foto</button>
+<button id="btnFoto" onclick="ambilFoto()">📸 Ambil Foto</button>
 <canvas id="foto" hidden></canvas>
 <img id="hasilFoto">
 
@@ -68,7 +67,7 @@
 <input id="lokasi" readonly>
 <button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
 
-<button onclick="kirim(this)">✅ SIMPAN</button>
+<button onclick="kirim(this)">✅ SIMPAN ABSENSI</button>
 
 </div>
 
