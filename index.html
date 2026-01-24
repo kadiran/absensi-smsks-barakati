@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Absensi Online</title>
+<title>Absensi Online SMSKS</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,7 +16,7 @@
 
 <div class="container">
 
-<label>Jenis Pegawai</label>
+<label>Jenis Pegawai *</label>
 <select id="jenis">
   <option value="">-- Pilih --</option>
   <option>Kepala Sekolah</option>
@@ -25,7 +25,7 @@
   <option>TU</option>
 </select>
 
-<label>Status Kepegawaian</label>
+<label>Status Kepegawaian *</label>
 <select id="status_kepegawaian">
   <option value="">-- Pilih --</option>
   <option>PNS</option>
@@ -36,13 +36,13 @@
   <option>Guru Honor Sekolah</option>
 </select>
 
-<label>NIP / NIK</label>
-<input id="nik">
+<label>NIP / NIK *</label>
+<input id="nik" placeholder="Masukkan NIP/NIK">
 
-<label>Nama</label>
-<input id="nama">
+<label>Nama *</label>
+<input id="nama" placeholder="Masukkan nama lengkap">
 
-<label>Status Kehadiran</label>
+<label>Status Kehadiran *</label>
 <select id="status" required>
   <option value="">-- Pilih --</option>
   <option value="Hadir">Hadir</option>
@@ -51,19 +51,19 @@
 </select>
 
 <label>Keterangan (Wajib jika Sakit/Izin)</label>
-<textarea id="keterangan"></textarea>
+<textarea id="keterangan" placeholder="Isi keterangan jika Sakit/Izin"></textarea>
 
-<label>Foto Selfie</label>
+<label>Foto Selfie *</label>
 <video id="video" autoplay></video>
 <button onclick="ambilFoto()">📸 Ambil Foto</button>
 <canvas id="foto" hidden></canvas>
 <img id="hasilFoto">
 
-<label>Tanda Tangan</label>
+<label>Tanda Tangan *</label>
 <canvas id="ttd" height="200"></canvas>
 <button onclick="hapusTTD()">Ulangi TTD</button>
 
-<label>Lokasi</label>
+<label>Lokasi *</label>
 <input id="lokasi" readonly>
 <button onclick="ambilLokasi()">📍 Ambil Lokasi</button>
 
