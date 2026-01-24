@@ -1,59 +1,22 @@
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbz8KcWKDqf0Ovfna4GtqyouQ7gDhhAOhaelaiZLA6aBVUZCKGs63Cr42SUm13AWTFDi/exec";
-let dataAbsensi = [];
+const SHEET_URL="https://script.google.com/macros/s/AKfycbz8KcWKDqf0Ovfna4GtqyouQ7gDhhAOhaelaiZLA6aBVUZCKGs63Cr42SUm13AWTFDi/exec";
+const ADMIN_PASS="admin123";
 
-function loadData(){
-  fetch(SHEET_URL)
-  .then(res=>res.json())
-  .then(json=>{
-    dataAbsensi=json;
-    renderTable(dataAbsensi);
-  });
-}
+const panel=document.getElementById("panel");
+const loading=document.getElementById("loading");
+const filterNama=document.getElementById("filterNama");
+const dataTable=document.getElementById("data");
+const btnCetak=document.getElementById("btnCetak");
+let absensiData=[];
 
-function renderTable(data){
-  const tbody=document.getElementById("data");
-  tbody.innerHTML="";
-  data.forEach((row,i)=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${i+1}</td>
-                  <td>${row.waktu}</td>
-                  <td>${row.nama}</td>
-                  <td>${row.status}</td>
-                  <td>${row.status_kepegawaian}</td>
-                  <td>${row.keterangan}</td>`;
-    tbody.appendChild(tr);
-  });
-}
+function login(){if(document.getElementById("pass").value===ADMIN_PASS){panel.style.display="block";loading.style.display="none";loadData();}else alert("Password salah");}
 
-function filterData(){
-  const bulan=document.getElementById("bulan").value;
-  const tahun=document.getElementById("tahun").value;
-  const nama=document.getElementById("filterNama").value;
+function loadData(){loading.innerText="⏳ Memuat data..."; fetch(SHEET_URL+"?action=getAll").then(r=>r.json()).then(data=>{absensiData=data; renderTable(data); populateFilterNama(); btnCetak.disabled=false; loading.style.display="none";}).catch(()=>loading.innerText="❌ Gagal memuat data");}
 
-  const filtered=dataAbsensi.filter(r=>{
-    const d=new Date(r.waktu);
-    const matchBulan=d.getMonth()+1==bulan;
-    const matchTahun=d.getFullYear()==tahun;
-    const matchNama=!nama || r.nama==nama;
-    return matchBulan && matchTahun && matchNama;
-  });
-  renderTable(filtered);
-}
+function renderTable(data){dataTable.innerHTML=""; data.forEach((r,i)=>{const tr=document.createElement("tr"); tr.innerHTML=`<td>${i+1}</td><td>${r.waktu||""}</td><td>${r.jenis||""}</td><td>${r.status_kepegawaian||""}</td><td>${r.nip||""}</td><td>${r.nama||""}</td><td>${r.status||""}</td><td>${r.keterangan||""}</td><td>${r.lokasi||""}</td><td>${r.foto?`<img src="${r.foto}" width="50">`:''}</td>`; dataTable.appendChild(tr);});}
 
-function cetakPDFBulanan(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+function populateFilterNama(){const set=new Set(absensiData.map(r=>r.nama)); filterNama.innerHTML="<option value=''>Semua</option>"; set.forEach(n=>{const o=document.createElement("option"); o.value=n; o.innerText=n; filterNama.appendChild(o);});}
 
-  const tanggal=new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
-  doc.text(`Muna Barat, ${tanggal}`,140,20);
-  doc.text("Kepala Sekolah,",140,27);
-  doc.text("Muhammad Ali",140,45);
-  const ttdKepsek=new Image();
-  ttdKepsek.src="ttd_kepsek.png";
-  doc.addImage(ttdKepsek,"PNG",140,30,40,20);
+function filterData(){const bulan=document.getElementById("bulan").value; const tahun=document.getElementById("tahun").value; const nama=filterNama.value; renderTable(absensiData.filter(r=>{const t=new Date(r.waktu); return (t.getMonth()+1==bulan && t.getFullYear()==tahun && (nama?r.nama===nama:true));}));}
 
-  doc.autoTable({ html:"#data", startY:70 });
-  doc.save(`Absensi_Bulanan.pdf`);
-}
-
-window.onload=loadData;
+// CETAK PDF
+function cetakPDFBulanan(){const doc=new jspdf.jsPDF(); const yStart=20; const rows=absensiData.map(r=>[r.waktu,r.jenis,r.status_kepegawaian,r.nip,r.nama,r.status,r.keterangan]); doc.autoTable({head:[["Waktu","Jenis","Status Kepegawaian","NIP","Nama","Status","Keterangan"]],body:rows,startY:yStart}); const ttdImg=new Image(); ttdImg.src="ttd_kepsek.png"; ttdImg.onload=()=>{const y=doc.internal.pageSize.getHeight()-50; doc.addImage(ttdImg,"PNG",140,y,40,20); const tgl=new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"}); doc.text(`Muna Barat, ${tgl}`,140,y+25); doc.text("Kepala Sekolah,",140,y+32); doc.text("Muhammad Ali",140,y+50); doc.save(`Absensi_${new Date().toLocaleDateString()}.pdf`);};}
