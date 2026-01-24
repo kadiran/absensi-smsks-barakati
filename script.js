@@ -1,7 +1,7 @@
 /*************************************************
  * KONFIGURASI
  *************************************************/
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyx8Ig_nb0TBW871KU4aDEsYEE-owzTzC0BfSjVHXCKgjjo0vP7cEi_51wgDQ_yQKF0/exec"; // Ganti dengan URL Web App
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyx8Ig_nb0TBW871KU4aDEsYEE-owzTzC0BfSjVHXCKgjjo0vP7cEi_51wgDQ_yQKF0/exec"; // Ganti dengan URL Web App Anda
 
 /*************************************************
  * KAMERA
