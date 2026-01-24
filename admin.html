@@ -3,52 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Absensi</title>
+<title>Admin Absensi SMSKS</title>
 <link rel="stylesheet" href="style.css">
-
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script src="admin.js"></script>
 </head>
 <body>
-
 <header>
-<img src="logo.png" width="70">
-<b>ADMIN ABSENSI</b>
-<p>SMSKS Barakati Muna Barat</p>
+<img src="logo.png" width="70"><br>
+<b>ADMIN ABSENSI</b><br>
+SMSKS Barakati Muna Barat
 </header>
-
-<div class="container">
+<div style="padding:10px">
+<input type="password" id="pass" placeholder="Password Admin">
+<button onclick="login()">LOGIN</button>
+<p id="loading">⏳ Memuat data...</p>
+<div id="panel" style="display:none">
 <label>Bulan:</label>
-<select id="bulan"></select>
-
-<label>Tahun:</label>
-<input type="number" id="tahun" value="2026">
-
-<label>Nama:</label>
-<select id="filterNama">
-<option value="">Semua</option>
+<select id="bulan" disabled>
+<option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
+<option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
+<option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
+<option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
 </select>
-
+<label>Tahun:</label><input type="number" id="tahun" value="2026" disabled>
+<label>Nama:</label><select id="filterNama"><option value="">Semua</option></select>
+<br><br>
 <button onclick="filterData()">🔍 Tampilkan</button>
 <button onclick="loadData()">🔄 Refresh</button>
-<button onclick="cetakPDFBulanan()">📄 CETAK PDF BULANAN</button>
-
+<button id="btnCetak" onclick="cetakPDFBulanan()" disabled>📄 CETAK PDF BULANAN</button>
+<hr>
 <table border="1" width="100%">
 <thead>
 <tr>
-<th>No</th>
-<th>Tanggal</th>
-<th>Nama</th>
-<th>Status Kehadiran</th>
-<th>Status Kepegawaian</th>
-<th>Keterangan</th>
+<th>No</th><th>Waktu</th><th>Jenis</th><th>Status Kepegawaian</th><th>NIP</th><th>Nama</th><th>Status Kehadiran</th><th>Keterangan</th><th>Lokasi</th><th>Foto</th>
 </tr>
 </thead>
 <tbody id="data"></tbody>
 </table>
-
+</div>
 </div>
 </body>
 </html>
