@@ -1,34 +1,50 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="id">
 <head>
-<title>Rekap Bulanan</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekap Absensi</title>
 <link rel="stylesheet" href="style.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="admin-rekap.js"></script>
 </head>
 <body>
 <header>
-<h3>REKAP ABSENSI BULANAN</h3>
+<img src="logo.png" width="70"><br>
+<b>REKAP ABSENSI</b><br>
+SMSKS Barakati Muna Barat
 </header>
 
-<div class="container">
-<select id="bulan">…</select>
-<input id="tahun" value="2026">
-<button onclick="loadRekap()">Tampilkan</button>
+<div style="padding:10px">
+<input type="password" id="pass" placeholder="Password Admin">
+<button onclick="login()">LOGIN</button>
 
+<p id="loading">⏳ Memuat data...</p>
+
+<div id="panel" style="display:none">
+<hr>
+<label>Bulan:</label>
+<select id="bulan" disabled></select>
+<label>Tahun:</label>
+<input type="number" id="tahun" value="2026" disabled>
+<label>Nama:</label>
+<select id="filterNama"><option value="">Semua</option></select>
+<br><br>
+<button onclick="filterData()">🔍 Tampilkan</button>
+<button onclick="loadData()">🔄 Refresh</button>
+<button id="btnCetak" onclick="cetakPDFRekap()" disabled>📄 CETAK REKAP PDF</button>
+
+<hr>
+<h3>Rekap Kehadiran per Nama</h3>
 <table border="1" width="100%">
 <thead>
-<tr>
-<th>Nama</th>
-<th>Status Kepegawaian</th>
-<th>Hadir</th>
-<th>Sakit</th>
-<th>Izin</th>
-<th>Total</th>
-</tr>
+<tr><th>Nama</th><th>Hadir</th><th>Sakit</th><th>Izin</th><th>Total</th></tr>
 </thead>
-<tbody id="rekap"></tbody>
+<tbody id="rekapGuru"></tbody>
 </table>
 </div>
-
-<script src="admin-rekap.js"></script>
+</div>
 </body>
 </html>
