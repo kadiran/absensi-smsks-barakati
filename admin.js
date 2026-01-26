@@ -1,116 +1,171 @@
-/*************************************************
- * ADMIN ABSENSI SMSKS
- *************************************************/
+// ===============================
+// KONFIGURASI
+// ===============================
+const ADMIN_PASSWORD = "12345"; // 🔴 GANTI PASSWORD ADMIN
+const API_URL = "https://script.google.com/macros/s/AKfycbwHI86dLZQkNHUuz3OHnaZwi0zMs3bPUfQPud1ilYQiZXAri7erC0x3xkLzBggt4luC/exec";
 
-// ================================
-// GANTI DI SINI DENGAN URL WEB APP
-// ================================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyx8Ig_nb0TBW871KU4aDEsYEE-owzTzC0BfSjVHXCKgjjo0vP7cEi_51wgDQ_yQKF0/exec";
+// ===============================
+let allData = [];
 
-// Password admin
-const ADMIN_PASS = "admin123";
-
-// Variabel global
-let dataAbsensi = [];
-let filteredData = [];
-
-// ===== LOGIN ADMIN =====
+// ===============================
+// LOGIN ADMIN
+// ===============================
 function login() {
   const pass = document.getElementById("pass").value;
-  if (pass !== ADMIN_PASS) {
-    alert("Password salah");
+  if (pass !== ADMIN_PASSWORD) {
+    alert("❌ Password salah");
     return;
   }
+
   document.getElementById("panel").style.display = "block";
+  document.getElementById("loading").style.display = "block";
+
+  initBulan();
   loadData();
 }
 
-// ===== LOAD DATA DARI SHEETS =====
-function loadData() {
-  document.getElementById("loading").innerText = "⏳ Memuat data...";
-  fetch(SHEET_URL + "?action=getAll")
-    .then(res => res.json())
-    .then(json => {
-      dataAbsensi = json;
-      filteredData = json;
-      renderRekap();
-      document.getElementById("loading").innerText = "";
-      document.getElementById("btnCetak").disabled = false;
+// ===============================
+// INISIAL BULAN
+// ===============================
+function initBulan() {
+  const bulan = document.getElementById("bulan");
+  const namaBulan = [
+    "Januari","Februari","Maret","April","Mei","Juni",
+    "Juli","Agustus","September","Oktober","November","Desember"
+  ];
 
-      // Isi dropdown nama
-      const namaDropdown = document.getElementById("filterNama");
-      const namaSet = new Set(json.map(d => d.nama));
-      namaDropdown.innerHTML = '<option value="">Semua</option>';
-      namaSet.forEach(n => {
-        const opt = document.createElement("option");
-        opt.value = n; opt.text = n;
-        namaDropdown.appendChild(opt);
-      });
+  bulan.innerHTML = "";
+  namaBulan.forEach((b, i) => {
+    const opt = document.createElement("option");
+    opt.value = i + 1;
+    opt.textContent = b;
+    bulan.appendChild(opt);
+  });
+
+  bulan.value = new Date().getMonth() + 1;
+  bulan.disabled = false;
+  document.getElementById("tahun").disabled = false;
+}
+
+// ===============================
+// LOAD DATA DARI SHEET
+// ===============================
+function loadData() {
+  document.getElementById("loading").style.display = "block";
+
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
+      isiFilterNama();
+      filterData();
+      document.getElementById("btnCetak").disabled = false;
+      document.getElementById("loading").style.display = "none";
     })
     .catch(err => {
-      alert("❌ Gagal load data: " + err);
-      document.getElementById("loading").innerText = "";
+      alert("❌ Gagal memuat data");
+      console.error(err);
     });
 }
 
-// ===== RENDER REKAP KE TABEL =====
-function renderRekap() {
-  const rekap = {};
-  filteredData.forEach(d => {
-    if (!rekap[d.nama]) rekap[d.nama] = { Hadir: 0, Sakit: 0, Izin: 0 };
-    rekap[d.nama][d.status]++;
+// ===============================
+// FILTER NAMA
+// ===============================
+function isiFilterNama() {
+  const select = document.getElementById("filterNama");
+  select.innerHTML = `<option value="">Semua</option>`;
+
+  const namaUnik = [...new Set(allData.map(d => d.nama))];
+  namaUnik.forEach(n => {
+    const opt = document.createElement("option");
+    opt.value = n;
+    opt.textContent = n;
+    select.appendChild(opt);
   });
+}
+
+// ===============================
+// FILTER DATA
+// ===============================
+function filterData() {
+  const bulan = document.getElementById("bulan").value;
+  const tahun = document.getElementById("tahun").value;
+  const nama = document.getElementById("filterNama").value;
+
+  const tbody = document.getElementById("data");
+  tbody.innerHTML = "";
+
+  let no = 1;
+  const hasil = allData.filter(d => {
+    const tgl = new Date(d.tanggal);
+    return (
+      tgl.getMonth() + 1 == bulan &&
+      tgl.getFullYear() == tahun &&
+      (nama === "" || d.nama === nama)
+    );
+  });
+
+  hasil.forEach(d => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${no++}</td>
+      <td>${new Date(d.tanggal).toLocaleDateString()}</td>
+      <td>${d.nama}</td>
+      <td>${d.status}</td>
+      <td>${d.keterangan || "-"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  rekapData(hasil);
+}
+
+// ===============================
+// REKAP PER NAMA
+// ===============================
+function rekapData(data) {
+  const rekap = {};
+  data.forEach(d => {
+    if (!rekap[d.nama]) {
+      rekap[d.nama] = { Hadir: 0, Sakit: 0, Izin: 0 };
+    }
+    if (rekap[d.nama][d.status] !== undefined) {
+      rekap[d.nama][d.status]++;
+    }
+  });
+
   const tbody = document.getElementById("rekapGuru");
   tbody.innerHTML = "";
+
   Object.keys(rekap).forEach(nama => {
-    const total = rekap[nama].Hadir + rekap[nama].Sakit + rekap[nama].Izin;
+    const r = rekap[nama];
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${nama}</td>
-                    <td>${rekap[nama].Hadir}</td>
-                    <td>${rekap[nama].Sakit}</td>
-                    <td>${rekap[nama].Izin}</td>
-                    <td>${total}</td>`;
+    tr.innerHTML = `
+      <td>${nama}</td>
+      <td>${r.Hadir}</td>
+      <td>${r.Sakit}</td>
+      <td>${r.Izin}</td>
+    `;
     tbody.appendChild(tr);
   });
 }
 
-// ===== FILTER DATA BERDASARKAN NAMA =====
-function filterData() {
-  const nama = document.getElementById("filterNama").value;
-  filteredData = nama ? dataAbsensi.filter(d => d.nama === nama) : dataAbsensi;
-  renderRekap();
-}
+// ===============================
+// CETAK PDF BULANAN
+// ===============================
+function cetakPDFBulanan() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-// ===== CETAK PDF REKAP =====
-function cetakPDFRekap() {
-  const doc = new jspdf.jsPDF();
-  doc.text("Rekap Absensi Bulanan", 14, 10);
-
-  const rows = [];
-  const rekap = {};
-  filteredData.forEach(d => {
-    if (!rekap[d.nama]) rekap[d.nama] = { Hadir: 0, Sakit: 0, Izin: 0 };
-    rekap[d.nama][d.status]++;
-  });
-  Object.keys(rekap).forEach(nama => {
-    const total = rekap[nama].Hadir + rekap[nama].Sakit + rekap[nama].Izin;
-    rows.push([nama, rekap[nama].Hadir, rekap[nama].Sakit, rekap[nama].Izin, total]);
-  });
+  doc.text("LAPORAN ABSENSI BULANAN", 14, 15);
 
   doc.autoTable({
-    head: [["Nama", "Hadir", "Sakit", "Izin", "Total"]],
-    body: rows
+    startY: 20,
+    head: [["No","Tanggal","Nama","Status","Keterangan"]],
+    body: [...document.querySelectorAll("#data tr")].map((tr,i) =>
+      [...tr.children].map(td => td.innerText)
+    )
   });
 
-  // ===== TTD Kepala Sekolah + Tanggal =====
-  const ttdImg = new Image();
-  ttdImg.src = "ttd_kepsek.png"; // pastikan ada di folder
-  doc.addImage(ttdImg, "PNG", 140, doc.lastAutoTable.finalY + 10, 40, 20);
-
-  const tgl = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
-  doc.text(`Muna Barat, ${tgl}`, 140, doc.lastAutoTable.finalY + 35);
-  doc.text("Kepala Sekolah,", 140, doc.lastAutoTable.finalY + 42);
-  doc.text("Muhammad Ali", 140, doc.lastAutoTable.finalY + 65);
-
-  doc.save("Rekap_Absensi_Bulanan.pdf");
+  doc.save("Laporan_Absensi.pdf");
 }
