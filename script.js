@@ -115,20 +115,27 @@ function ttdKosong() {
  *************************************************/
 function ambilLokasi() {
   if (!navigator.geolocation) {
-    alert("❌ GPS tidak didukung");
+    alert("GPS tidak didukung");
     return;
   }
 
   navigator.geolocation.getCurrentPosition(
-    pos => {
-      lokasi.value =
+    function (pos) {
+      document.getElementById("lokasi").value =
         pos.coords.latitude.toFixed(6) + "," +
         pos.coords.longitude.toFixed(6);
     },
-    () => alert("❌ Lokasi ditolak, aktifkan GPS"),
-    { enableHighAccuracy: true, timeout: 10000 }
+    function (err) {
+      alert("Lokasi ditolak. Aktifkan GPS & izinkan lokasi browser");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
   );
 }
+
 
 /*************************************************
  * KIRIM DATA ABSENSI
@@ -190,3 +197,4 @@ function kirim(btn) {
     btn.innerText = "✅ SIMPAN";
   });
 }
+
