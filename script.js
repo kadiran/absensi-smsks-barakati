@@ -4,24 +4,18 @@
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxsEEsNcmaXXIzZJN8z5Ztiva8GlHsYv_MhK2ac8YuQw13nN8KZKrsrg3hRJSHW71iu/exec";
 
 /*************************************************
- * AMBIL ELEMEN
+ * KAMERA (SELFIE)
  *************************************************/
 const video = document.getElementById("video");
 const canvasFoto = document.getElementById("foto");
 const hasilFoto = document.getElementById("hasilFoto");
-const lokasi = document.getElementById("lokasi");
-const ttd = document.getElementById("ttd");
-const ctx = ttd.getContext("2d");
 
-/*************************************************
- * KAMERA DEPAN (SELFIE)
- *************************************************/
 if (navigator.mediaDevices && video) {
   navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user" }
+    video: { facingMode: "user", width: { ideal: 640 } }
   })
   .then(stream => video.srcObject = stream)
-  .catch(() => alert("❌ Kamera tidak tersedia / izin ditolak"));
+  .catch(() => alert("❌ Kamera tidak tersedia / ditolak"));
 }
 
 function ambilFoto() {
@@ -30,7 +24,7 @@ function ambilFoto() {
     return;
   }
 
-  const maxWidth = 480;
+  const maxWidth = 400;
   const scale = maxWidth / video.videoWidth;
 
   canvasFoto.width = maxWidth;
@@ -40,16 +34,19 @@ function ambilFoto() {
     video, 0, 0, canvasFoto.width, canvasFoto.height
   );
 
-  hasilFoto.src = canvasFoto.toDataURL("image/jpeg", 0.6);
+  // 🔥 KOMPRESI FOTO
+  hasilFoto.src = canvasFoto.toDataURL("image/jpeg", 0.5);
 }
 
 /*************************************************
  * TANDA TANGAN (MOUSE + TOUCH)
  *************************************************/
+const ttd = document.getElementById("ttd");
+const ctx = ttd.getContext("2d");
 let menggambar = false;
+
 ctx.lineWidth = 2;
 ctx.lineCap = "round";
-ctx.strokeStyle = "#000";
 
 function posisi(e) {
   const rect = ttd.getBoundingClientRect();
@@ -62,7 +59,6 @@ function posisi(e) {
   return { x: e.offsetX, y: e.offsetY };
 }
 
-// Mouse
 ttd.addEventListener("mousedown", e => {
   menggambar = true;
   const p = posisi(e);
@@ -80,7 +76,6 @@ ttd.addEventListener("mousemove", e => {
 ttd.addEventListener("mouseup", () => menggambar = false);
 ttd.addEventListener("mouseleave", () => menggambar = false);
 
-// Touch (HP)
 ttd.addEventListener("touchstart", e => {
   e.preventDefault();
   menggambar = true;
@@ -111,31 +106,30 @@ function ttdKosong() {
 }
 
 /*************************************************
- * LOKASI GPS
+ * LOKASI GPS (CEPAT & AMAN)
  *************************************************/
 function ambilLokasi() {
   if (!navigator.geolocation) {
-    alert("GPS tidak didukung");
+    alert("❌ GPS tidak didukung");
     return;
   }
 
   navigator.geolocation.getCurrentPosition(
-    function (pos) {
-      document.getElementById("lokasi").value =
+    pos => {
+      lokasi.value =
         pos.coords.latitude.toFixed(6) + "," +
         pos.coords.longitude.toFixed(6);
     },
-    function (err) {
-      alert("Lokasi ditolak. Aktifkan GPS & izinkan lokasi browser");
+    err => {
+      alert("❌ Lokasi gagal, pastikan GPS aktif");
     },
     {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+      enableHighAccuracy: false, // 🔥 CEPAT
+      timeout: 7000,
+      maximumAge: 60000
     }
   );
 }
-
 
 /*************************************************
  * KIRIM DATA ABSENSI
@@ -143,6 +137,9 @@ function ambilLokasi() {
 function kirim(btn) {
   btn.disabled = true;
   btn.innerText = "⏳ Mengirim...";
+
+  // 🔥 KOMPRES TTD
+  const ttdKompres = ttd.toDataURL("image/jpeg", 0.4);
 
   const data = {
     waktu: new Date().toISOString(),
@@ -154,10 +151,12 @@ function kirim(btn) {
     keterangan: keterangan.value.trim(),
     lokasi: lokasi.value.trim(),
     foto: hasilFoto.src || "",
-    ttd: ttd.toDataURL()
+    ttd: ttdKompres
   };
 
-  // Validasi wajib
+  // =========================
+  // VALIDASI
+  // =========================
   if (
     !data.jenis ||
     !data.status_kepegawaian ||
@@ -174,14 +173,16 @@ function kirim(btn) {
     return;
   }
 
-  // Keterangan wajib jika Sakit / Izin
   if ((data.status === "Sakit" || data.status === "Izin") && !data.keterangan) {
-    alert("❗ Keterangan wajib diisi jika SAKIT / IZIN");
+    alert("❗ Keterangan wajib diisi");
     btn.disabled = false;
     btn.innerText = "✅ SIMPAN";
     return;
   }
 
+  // =========================
+  // KIRIM
+  // =========================
   fetch(SHEET_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -197,4 +198,3 @@ function kirim(btn) {
     btn.innerText = "✅ SIMPAN";
   });
 }
-
