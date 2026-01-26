@@ -1,57 +1,106 @@
 /*************************************************
  * KONFIGURASI
  *************************************************/
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyx8Ig_nb0TBW871KU4aDEsYEE-owzTzC0BfSjVHXCKgjjo0vP7cEi_51wgDQ_yQKF0/exec"; // Ganti dengan URL Web App Anda
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxsEEsNcmaXXIzZJN8z5Ztiva8GlHsYv_MhK2ac8YuQw13nN8KZKrsrg3hRJSHW71iu/exec";
 
 /*************************************************
- * KAMERA
+ * AMBIL ELEMEN
  *************************************************/
 const video = document.getElementById("video");
 const canvasFoto = document.getElementById("foto");
 const hasilFoto = document.getElementById("hasilFoto");
+const lokasi = document.getElementById("lokasi");
+const ttd = document.getElementById("ttd");
+const ctx = ttd.getContext("2d");
 
+/*************************************************
+ * KAMERA DEPAN (SELFIE)
+ *************************************************/
 if (navigator.mediaDevices && video) {
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => video.srcObject = stream)
-    .catch(() => alert("Kamera tidak tersedia / ditolak"));
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "user" }
+  })
+  .then(stream => video.srcObject = stream)
+  .catch(() => alert("❌ Kamera tidak tersedia / izin ditolak"));
 }
 
 function ambilFoto() {
   if (!video.videoWidth) {
-    alert("⏳ Kamera belum siap, tunggu sebentar");
+    alert("⏳ Kamera belum siap");
     return;
   }
-  canvasFoto.width = video.videoWidth;
-  canvasFoto.height = video.videoHeight;
-  canvasFoto.getContext("2d").drawImage(video, 0, 0);
-  hasilFoto.src = canvasFoto.toDataURL("image/png");
+
+  const maxWidth = 480;
+  const scale = maxWidth / video.videoWidth;
+
+  canvasFoto.width = maxWidth;
+  canvasFoto.height = video.videoHeight * scale;
+
+  canvasFoto.getContext("2d").drawImage(
+    video, 0, 0, canvasFoto.width, canvasFoto.height
+  );
+
+  hasilFoto.src = canvasFoto.toDataURL("image/jpeg", 0.6);
 }
 
 /*************************************************
- * TANDA TANGAN
+ * TANDA TANGAN (MOUSE + TOUCH)
  *************************************************/
-const ttd = document.getElementById("ttd");
-const ctx = ttd.getContext("2d");
 let menggambar = false;
+ctx.lineWidth = 2;
+ctx.lineCap = "round";
+ctx.strokeStyle = "#000";
 
+function posisi(e) {
+  const rect = ttd.getBoundingClientRect();
+  if (e.touches) {
+    return {
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top
+    };
+  }
+  return { x: e.offsetX, y: e.offsetY };
+}
+
+// Mouse
 ttd.addEventListener("mousedown", e => {
   menggambar = true;
+  const p = posisi(e);
   ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
+  ctx.moveTo(p.x, p.y);
 });
 
 ttd.addEventListener("mousemove", e => {
   if (!menggambar) return;
-  ctx.lineTo(e.offsetX, e.offsetY);
+  const p = posisi(e);
+  ctx.lineTo(p.x, p.y);
   ctx.stroke();
 });
 
 ttd.addEventListener("mouseup", () => menggambar = false);
 ttd.addEventListener("mouseleave", () => menggambar = false);
 
+// Touch (HP)
+ttd.addEventListener("touchstart", e => {
+  e.preventDefault();
+  menggambar = true;
+  const p = posisi(e);
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+});
+
+ttd.addEventListener("touchmove", e => {
+  e.preventDefault();
+  if (!menggambar) return;
+  const p = posisi(e);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+});
+
+ttd.addEventListener("touchend", () => menggambar = false);
+
 function hapusTTD() {
   ctx.clearRect(0, 0, ttd.width, ttd.height);
-  ctx.beginPath();
 }
 
 function ttdKosong() {
@@ -62,24 +111,27 @@ function ttdKosong() {
 }
 
 /*************************************************
- * LOKASI
+ * LOKASI GPS
  *************************************************/
 function ambilLokasi() {
   if (!navigator.geolocation) {
-    alert("GPS tidak didukung");
+    alert("❌ GPS tidak didukung");
     return;
   }
 
   navigator.geolocation.getCurrentPosition(
     pos => {
-      lokasi.value = pos.coords.latitude + "," + pos.coords.longitude;
+      lokasi.value =
+        pos.coords.latitude.toFixed(6) + "," +
+        pos.coords.longitude.toFixed(6);
     },
-    () => alert("Lokasi ditolak")
+    () => alert("❌ Lokasi ditolak, aktifkan GPS"),
+    { enableHighAccuracy: true, timeout: 10000 }
   );
 }
 
 /*************************************************
- * KIRIM DATA
+ * KIRIM DATA ABSENSI
  *************************************************/
 function kirim(btn) {
   btn.disabled = true;
@@ -98,9 +150,7 @@ function kirim(btn) {
     ttd: ttd.toDataURL()
   };
 
-  // =========================
-  // VALIDASI WAJIB
-  // =========================
+  // Validasi wajib
   if (
     !data.jenis ||
     !data.status_kepegawaian ||
@@ -111,25 +161,20 @@ function kirim(btn) {
     !data.lokasi ||
     ttdKosong()
   ) {
-    alert("❗ Semua data wajib diisi (kecuali keterangan hanya untuk Sakit/Izin)");
+    alert("❗ Semua data wajib diisi");
     btn.disabled = false;
     btn.innerText = "✅ SIMPAN";
     return;
   }
 
-  // =========================
-  // KETERANGAN WAJIB JIKA SAKIT / IZIN
-  // =========================
+  // Keterangan wajib jika Sakit / Izin
   if ((data.status === "Sakit" || data.status === "Izin") && !data.keterangan) {
-    alert("❗ Keterangan wajib diisi jika status SAKIT / IZIN");
+    alert("❗ Keterangan wajib diisi jika SAKIT / IZIN");
     btn.disabled = false;
     btn.innerText = "✅ SIMPAN";
     return;
   }
 
-  // =========================
-  // KIRIM KE GOOGLE SHEET
-  // =========================
   fetch(SHEET_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
