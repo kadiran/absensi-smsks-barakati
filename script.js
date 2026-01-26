@@ -1,8 +1,5 @@
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyozP8ngH_086cxxDDAwTGXCnPxXFRgs6LZL5y12GabGd9GWoL4K1_B6xGmkl8uvPg6/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbw_uaEJoz413O4fRJWejUNff2m4Irn82-G9Vzstl-ruviyt5YcNFjyXKlbdN2Ybh_9v/exec";
 
-// ===============================
-// KIRIM DATA
-// ===============================
 function kirim(btn) {
   btn.disabled = true;
   btn.innerText = "⏳ Mengirim...";
@@ -17,7 +14,7 @@ function kirim(btn) {
     keterangan: keterangan.value.trim(),
     lokasi: lokasi.value.trim(),
     foto: hasilFoto.src || "",
-    ttd: ttd.toDataURL("image/jpeg", 0.4) // 🔥 dikompres
+    ttd: ttd.toDataURL()
   };
 
   if (
@@ -26,10 +23,10 @@ function kirim(btn) {
     !data.nip ||
     !data.nama ||
     !data.status ||
-    !data.lokasi ||
-    !data.foto
+    !data.foto ||
+    !data.lokasi
   ) {
-    alert("❗ Lengkapi semua data");
+    alert("❗ Semua data wajib diisi");
     btn.disabled = false;
     btn.innerText = "✅ SIMPAN";
     return;
@@ -44,15 +41,15 @@ function kirim(btn) {
 
   fetch(SHEET_URL, {
     method: "POST",
-    body: JSON.stringify(data),
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
   })
   .then(() => {
-    alert("✅ Absensi berhasil");
+    alert("✅ Absensi berhasil disimpan");
     location.reload();
   })
   .catch(() => {
-    alert("❌ Gagal mengirim");
+    alert("❌ Gagal mengirim data");
     btn.disabled = false;
     btn.innerText = "✅ SIMPAN";
   });
