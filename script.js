@@ -1,7 +1,7 @@
 // ===============================
 // KONFIGURASI
 // ===============================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwHI86dLZQkNHUuz3OHnaZwi0zMs3bPUfQPud1ilYQiZXAri7erC0x3xkLzBggt4luC/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwlGNNrhZOQPm3njNm032MTOjDjoKGaTbZ6RyigihU2HI0vT00zXLNrWeYH4gWT_tWC/exec";
 
 // ===============================
 // ELEMENTS
@@ -161,3 +161,4 @@ function kirim(btn){
     btn.innerText="✅ SIMPAN";
   });
 }
+
