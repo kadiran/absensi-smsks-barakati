@@ -2,7 +2,7 @@
 // KONFIGURASI
 // ===============================
 const ADMIN_PASSWORD = "12345"; 
-const API_URL = "https://script.google.com/macros/s/AKfycbwHI86dLZQkNHUuz3OHnaZwi0zMs3bPUfQPud1ilYQiZXAri7erC0x3xkLzBggt4luC/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxk8qvZrQSbtHBhE1jEKBBhYk8E8dG4FlEB_pn8BiX-BIGsVetsAEmqRJa2KtSAs-SU/exec";
 
 // ===============================
 let allData = [];
