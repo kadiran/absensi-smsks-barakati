@@ -1,12 +1,25 @@
+const ADMIN_PASSWORD = "12345";
 const API_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
+
 let allData = [];
 
-fetch(API_URL)
-  .then(r => r.json())
-  .then(d => {
-    allData = d;
-    filterData();
-  });
+function login() {
+  if (document.getElementById("pass").value !== ADMIN_PASSWORD) {
+    alert("❌ Password salah");
+    return;
+  }
+  document.getElementById("panel").style.display = "block";
+  loadData();
+}
+
+function loadData() {
+  fetch(API_URL)
+    .then(r => r.json())
+    .then(d => {
+      allData = d;
+      filterData();
+    });
+}
 
 function filterData() {
   const bulan = document.getElementById("bulan").value;
@@ -20,9 +33,7 @@ function filterData() {
     const t = new Date(d.waktu);
     if (t.getMonth() + 1 == bulan && t.getFullYear() == tahun) {
       if (!rekap[d.nama]) rekap[d.nama] = { Hadir: 0, Sakit: 0, Izin: 0 };
-      if (rekap[d.nama][d.status] !== undefined) {
-        rekap[d.nama][d.status]++;
-      }
+      rekap[d.nama][d.status]++;
     }
   });
 
