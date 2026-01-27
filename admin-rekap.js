@@ -2,7 +2,7 @@
 // KONFIGURASI
 // ===============================
 const ADMIN_PASSWORD = "12345"; 
-const API_URL = "https://script.google.com/macros/s/AKfycbxxXF1xKxY3YhCESLBLB3-02WFsi-rnAmYKDgDEVHQJAAvNP3AqefApnQHm5ORyexfW/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
 
 // ===============================
 let allData = [];
@@ -148,3 +148,4 @@ function cetakPDFRekap() {
 
   doc.save("Rekap_Absensi.pdf");
 }
+
