@@ -9,14 +9,24 @@ function login() {
     return;
   }
   document.getElementById("panel").style.display = "block";
+  initBulan();
   loadData();
+}
+
+function initBulan() {
+  const bulan = document.getElementById("bulan");
+  bulan.innerHTML = "";
+  ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"].forEach((b,i)=>{
+    bulan.innerHTML += `<option value="${i+1}">${b}</option>`;
+  });
+  bulan.value = new Date().getMonth() + 1;
 }
 
 function loadData() {
   fetch(API_URL)
-    .then(r => r.json())
-    .then(d => {
-      allData = d;
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
       filterData();
     });
 }
@@ -30,18 +40,18 @@ function filterData() {
   const rekap = {};
 
   allData.forEach(d => {
-    const t = new Date(d.waktu);
-    if (t.getMonth() + 1 == bulan && t.getFullYear() == tahun) {
-      if (!rekap[d.nama]) rekap[d.nama] = { Hadir: 0, Sakit: 0, Izin: 0 };
-      rekap[d.nama][d.status]++;
+    const tgl = new Date(d.waktu); // ✅ FIX PENTING
+    if (tgl.getMonth()+1 == bulan && tgl.getFullYear() == tahun) {
+      if (!rekap[d.nama]) rekap[d.nama] = { Hadir:0, Sakit:0, Izin:0 };
+      if (rekap[d.nama][d.status] !== undefined) rekap[d.nama][d.status]++;
     }
   });
 
-  Object.keys(rekap).forEach(n => {
-    const r = rekap[n];
+  Object.keys(rekap).forEach(nama => {
+    const r = rekap[nama];
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${n}</td>
+      <td>${nama}</td>
       <td>${r.Hadir}</td>
       <td>${r.Sakit}</td>
       <td>${r.Izin}</td>
