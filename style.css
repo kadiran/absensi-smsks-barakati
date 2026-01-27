@@ -1,9 +1,181 @@
-body{font-family:Arial;background:#f4f6f9;margin:0}
-header{text-align:center;background:#0b5ed7;color:#fff;padding:15px}
-.container{padding:15px}
-label{font-weight:bold;margin-top:10px;display:block}
-input,select,textarea,button{width:100%;padding:10px;margin-top:5px}
-button{background:#198754;color:#fff;border:none}
-video,canvas,img{width:100%;margin-top:10px}
-footer{text-align:center;font-size:12px;color:#666;margin:15px}
-canvas#ttd{border:1px solid #000;touch-action:none}
+/* ===============================
+   GLOBAL
+================================ */
+body{
+  font-family:Arial, sans-serif;
+  background:#f4f6f9;
+  margin:0;
+}
+
+header{
+  text-align:center;
+  background:linear-gradient(90deg,#0b5ed7,#c9a227);
+  color:#fff;
+  padding:15px;
+}
+
+label{
+  font-weight:bold;
+  margin-top:10px;
+  display:block;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border:1px solid #ccc;
+  border-radius:4px;
+}
+
+video,canvas,img{
+  width:100%;
+  margin-top:10px;
+  border-radius:6px;
+}
+
+canvas#ttd{
+  border:1px solid #000;
+  touch-action:none;
+}
+
+/* ===============================
+   BUTTON FORM ABSENSI
+================================ */
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#0b5ed7;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#094bb5;
+}
+
+/* ===============================
+   ADMIN (TOMBOL KECIL & EMAS)
+================================ */
+#panel button,
+.admin button{
+  width:auto;
+  padding:6px 14px;
+  font-size:13px;
+  background:#c9a227;
+  color:#000;
+  border-radius:4px;
+}
+
+#panel button:hover,
+.admin button:hover{
+  background:#b8961f;
+}
+
+/* ===============================
+   TABEL ADMIN
+================================ */
+table{
+  border-collapse:collapse;
+  width:100%;
+  background:#fff;
+}
+
+th{
+  background:#0b5ed7;
+  color:#fff;
+  padding:8px;
+  font-size:13px;
+}
+
+td{
+  padding:6px;
+  font-size:13px;
+  text-align:center;
+}
+
+/* ===============================
+   SPLASH SCREEN FINAL
+================================ */
+.splash{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:linear-gradient(160deg,#0b5ed7,#c9a227);
+}
+
+.splash-box{
+  text-align:center;
+  color:#fff;
+  animation:fadeUp 1.2s ease-out;
+}
+
+.splash-box img{
+  width:120px;
+  margin-bottom:15px;
+}
+
+.splash-box h1{
+  margin:5px 0;
+  font-size:28px;
+  letter-spacing:1px;
+}
+
+.splash-box p{
+  margin:0;
+  font-size:16px;
+  opacity:.9;
+}
+
+.splash-box small{
+  display:block;
+  margin-top:8px;
+  opacity:.8;
+}
+
+/* animasi splash */
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* ===============================
+   RESPONSIVE DESKTOP
+================================ */
+@media(min-width:768px){
+  .container{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+  }
+
+  table th, table td{
+    font-size:14px;
+  }
+}
+
+/* ===============================
+   RESPONSIVE MOBILE
+================================ */
+@media(max-width:767px){
+  th,td{
+    font-size:12px;
+  }
+
+  button{
+    font-size:14px;
+  }
+}
