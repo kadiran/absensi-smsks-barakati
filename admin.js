@@ -1,111 +1,110 @@
+const ADMIN_PASSWORD = "12345";
 const API_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
 
-let semuaData = [];
+let allData = [];
 
-window.onload = () => {
-  const bln = document.getElementById("bulan");
-  ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"]
-    .forEach((b,i)=> bln.innerHTML += `<option value="${i+1}">${b}</option>`);
-  bln.value = new Date().getMonth()+1;
+// ================= LOGIN =================
+function login(){
+  if(document.getElementById("pass").value !== ADMIN_PASSWORD){
+    alert("❌ Password salah");
+    return;
+  }
+  document.getElementById("panel").style.display = "block";
+  document.getElementById("loading").style.display = "block";
+  initBulan();
   loadData();
-};
+}
 
+// ================= BULAN =================
+function initBulan(){
+  const bulan = document.getElementById("bulan");
+  const nama = ["Januari","Februari","Maret","April","Mei","Juni",
+                "Juli","Agustus","September","Oktober","November","Desember"];
+  bulan.innerHTML = "";
+  nama.forEach((b,i)=>{
+    bulan.innerHTML += `<option value="${i+1}">${b}</option>`;
+  });
+  bulan.value = new Date().getMonth()+1;
+}
+
+// ================= LOAD DATA =================
 function loadData(){
   fetch(API_URL)
     .then(r=>r.json())
-    .then(d=>{
-      semuaData = d;
-      tampilkan();
+    .then(data=>{
+      allData = data;
+      isiFilterNama();
+      filterData();
+      document.getElementById("loading").style.display = "none";
+    })
+    .catch(()=>{
+      alert("❌ Gagal memuat data");
+      document.getElementById("loading").style.display = "none";
     });
 }
 
+// ================= FILTER NAMA =================
+function isiFilterNama(){
+  const f = document.getElementById("filterNama");
+  f.innerHTML = `<option value="">Semua</option>`;
+  [...new Set(allData.map(d=>d.nama))].forEach(n=>{
+    f.innerHTML += `<option value="${n}">${n}</option>`;
+  });
+}
+
+// ================= TAMPILKAN =================
 function tampilkan(){
+  filterData();
+}
+
+// ================= REFRESH =================
+function refreshData(){
+  document.getElementById("loading").style.display = "block";
+  loadData();
+}
+
+// ================= FILTER DATA =================
+function filterData(){
   const bulan = document.getElementById("bulan").value;
   const tahun = document.getElementById("tahun").value;
+  const nama = document.getElementById("filterNama").value;
   const tbody = document.getElementById("data");
   tbody.innerHTML = "";
 
   let no = 1;
-  semuaData.forEach(d=>{
+  allData.forEach(d=>{
     const t = new Date(d.waktu);
-    if(t.getMonth()+1==bulan && t.getFullYear()==tahun){
+    if(
+      t.getMonth()+1 == bulan &&
+      t.getFullYear() == tahun &&
+      (nama==="" || d.nama===nama)
+    ){
       tbody.innerHTML += `
         <tr>
           <td>${no++}</td>
           <td>${t.toLocaleString("id-ID")}</td>
           <td>${d.nama}</td>
           <td>${d.status}</td>
-          <td>${d.keterangan||"-"}</td>
+          <td>${d.keterangan || "-"}</td>
         </tr>`;
     }
   });
 }
 
-function refresh(){
-  loadData();
-}
-
-// =======================
-// CETAK PDF RESMI SEKOLAH
-// =======================
+// ================= CETAK PDF =================
 function cetakPDF(){
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p","mm","a4");
+  const doc = new jsPDF();
 
-  // LOGO
-  doc.addImage("logo_kiri.png","PNG",15,10,25,25);
-  doc.addImage("logo_kanan.png","PNG",170,10,25,25);
+  doc.text("LAPORAN ABSENSI BULANAN",14,15);
 
-  // KOP
-  doc.setFont("times","bold");
-  doc.setFontSize(12);
-  doc.text("PEMERINTAH PROVINSI SULAWESI TENGGARA",105,15,{align:"center"});
-  doc.text("DINAS PENDIDIKAN DAN KEBUDAYAAN",105,21,{align:"center"});
-  doc.text("SEKOLAH MENENGAH KEJURUAN",105,27,{align:"center"});
-  doc.setFontSize(14);
-  doc.text("SMKS BARAKATI MUNA BARAT",105,33,{align:"center"});
-
-  doc.setFont("times","normal");
-  doc.setFontSize(10);
-  doc.text(
-    "Jl. Pendidikan Desa Bungkollo, Kecamatan Barangka, Kabupaten Muna Barat",
-    105,39,{align:"center"}
-  );
-  doc.text(
-    "Telp/HP: 0821 9613 6833  Email: smk.barakati@yahoo.com",
-    105,44,{align:"center"}
-  );
-
-  doc.setLineWidth(0.8);
-  doc.line(15,48,195,48);
-  doc.line(15,50,195,50);
-
-  // JUDUL
-  doc.setFont("times","bold");
-  doc.setFontSize(12);
-  doc.text("REKAP ABSENSI BULANAN",105,60,{align:"center"});
-
-  // TABEL
   doc.autoTable({
-    startY: 65,
-    html: "#tabel",
-    styles:{font:"times",fontSize:10}
+    startY:20,
+    head:[["No","Tanggal","Nama","Status","Keterangan"]],
+    body:[...document.querySelectorAll("#data tr")].map(tr =>
+      [...tr.children].map(td => td.innerText)
+    )
   });
 
-  // TANGGAL CETAK
-  const y = doc.lastAutoTable.finalY + 10;
-  const tgl = new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
-  doc.text(`Barakati, ${tgl}`,140,y);
-
-  // JABATAN
-  doc.text("Kepala Sekolah,",140,y+6);
-
-  // TTD
-  doc.addImage("ttd_kepsek.png","PNG",140,y+10,40,25);
-
-  // NAMA
-  doc.setFont("times","bold");
-  doc.text("La Ode Hanuli, S.Pd",140,y+40);
-
-  doc.save("Rekap_Absensi.pdf");
+  doc.save("Absensi_Bulanan.pdf");
 }
