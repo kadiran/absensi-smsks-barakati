@@ -1,17 +1,30 @@
+// ===============================
+// KONFIGURASI
+// ===============================
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
 
-/* ================= ELEMENT ================= */
-const video = document.getElementById("video");
-const hasilFoto = document.getElementById("hasilFoto");
-const fotoCanvas = document.getElementById("foto");
+// ===============================
+// ELEMENT
+// ===============================
+const jenis = document.getElementById("jenis");
+const status_kepegawaian = document.getElementById("status_kepegawaian");
+const nik = document.getElementById("nik");
+const nama = document.getElementById("nama");
+const status = document.getElementById("status");
+const keterangan = document.getElementById("keterangan");
 const lokasi = document.getElementById("lokasi");
+const hasilFoto = document.getElementById("hasilFoto");
+const video = document.getElementById("video");
+const fotoCanvas = document.getElementById("foto");
+const ttd = document.getElementById("ttd");
+const ctxTTD = ttd.getContext("2d");
 
-/* ================= KAMERA ================= */
-if (navigator.mediaDevices) {
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(s => video.srcObject = s)
-    .catch(() => alert("❌ Kamera ditolak"));
-}
+// ===============================
+// CAMERA
+// ===============================
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+  .then(stream => video.srcObject = stream)
+  .catch(() => alert("❌ Kamera tidak diizinkan"));
 
 function ambilFoto() {
   fotoCanvas.width = video.videoWidth;
@@ -20,87 +33,121 @@ function ambilFoto() {
   hasilFoto.src = fotoCanvas.toDataURL("image/jpeg", 0.6);
 }
 
-/* ================= GPS (AMAN LAPTOP) ================= */
+// ===============================
+// GPS
+// ===============================
 function ambilLokasi() {
-  if (!navigator.geolocation) {
-    lokasi.value = "Lokasi tidak didukung";
-    return;
-  }
-
   navigator.geolocation.getCurrentPosition(
-    p => lokasi.value = p.coords.latitude + "," + p.coords.longitude,
-    () => lokasi.value = "Lokasi gagal (ISP)"
+    pos => lokasi.value = pos.coords.latitude + "," + pos.coords.longitude,
+    () => alert("❌ Lokasi tidak aktif")
   );
 }
 
-/* ================= TTD FINAL ================= */
-const ttd = document.getElementById("ttd");
-const ctx = ttd.getContext("2d");
+// ===============================
+// TTD (HP & PC) — FINAL
+// ===============================
+let drawing = false, x = 0, y = 0;
 
-ttd.width = Math.min(window.innerWidth * 0.9, 350);
-ttd.height = 200;
-ctx.lineWidth = 2;
-ctx.lineCap = "round";
+ctxTTD.lineWidth = 2;
+ctxTTD.lineCap = "round";
+ctxTTD.strokeStyle = "#000";
 
-let draw = false, lx = 0, ly = 0;
+function hapusTTD() {
+  ctxTTD.clearRect(0, 0, ttd.width, ttd.height);
+}
 
-function pos(e) {
+// posisi
+function posisi(e) {
   const r = ttd.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
   return { x: p.clientX - r.left, y: p.clientY - r.top };
 }
 
-ttd.onmousedown = e => { draw = true; ({x:lx,y:ly}=pos(e)); };
-ttd.onmousemove = e => {
-  if(!draw) return;
-  const p = pos(e);
-  ctx.beginPath();
-  ctx.moveTo(lx,ly);
-  ctx.lineTo(p.x,p.y);
-  ctx.stroke();
-  lx=p.x; ly=p.y;
-};
-["mouseup","mouseleave"].forEach(e=>ttd.addEventListener(e,()=>draw=false));
+// PC
+ttd.addEventListener("mousedown", e => {
+  drawing = true;
+  ({ x, y } = posisi(e));
+});
 
-ttd.ontouchstart = e => { e.preventDefault(); draw=true; ({x:lx,y:ly}=pos(e)); };
-ttd.ontouchmove = e => {
+ttd.addEventListener("mousemove", e => {
+  if (!drawing) return;
+  const p = posisi(e);
+  ctxTTD.beginPath();
+  ctxTTD.moveTo(x, y);
+  ctxTTD.lineTo(p.x, p.y);
+  ctxTTD.stroke();
+  x = p.x; y = p.y;
+});
+
+["mouseup", "mouseleave"].forEach(ev =>
+  ttd.addEventListener(ev, () => drawing = false)
+);
+
+// HP
+ttd.addEventListener("touchstart", e => {
   e.preventDefault();
-  if(!draw) return;
-  const p = pos(e);
-  ctx.beginPath();
-  ctx.moveTo(lx,ly);
-  ctx.lineTo(p.x,p.y);
-  ctx.stroke();
-  lx=p.x; ly=p.y;
-};
-ttd.ontouchend = ()=>draw=false;
+  drawing = true;
+  ({ x, y } = posisi(e));
+});
 
-function hapusTTD(){
-  ctx.clearRect(0,0,ttd.width,ttd.height);
-}
+ttd.addEventListener("touchmove", e => {
+  e.preventDefault();
+  if (!drawing) return;
+  const p = posisi(e);
+  ctxTTD.beginPath();
+  ctxTTD.moveTo(x, y);
+  ctxTTD.lineTo(p.x, p.y);
+  ctxTTD.stroke();
+  x = p.x; y = p.y;
+});
 
-/* ================= KIRIM ================= */
-function kirim(btn){
-  btn.disabled=true;
-  btn.innerText="Mengirim...";
+ttd.addEventListener("touchend", () => drawing = false);
 
-  const data={
-    jenis:jenis.value,
-    status_kepegawaian:status_kepegawaian.value,
-    nip:nik.value,
-    nama:nama.value,
-    status:status.value,
-    keterangan:keterangan.value,
-    lokasi:lokasi.value,
-    foto:hasilFoto.src,
-    ttd:ttd.toDataURL()
+// ===============================
+// KIRIM DATA
+// ===============================
+function kirim(btn) {
+  btn.disabled = true;
+  btn.innerText = "Mengirim...";
+
+  if ((status.value === "Sakit" || status.value === "Izin") && !keterangan.value.trim()) {
+    alert("❗ Keterangan wajib diisi");
+    btn.disabled = false;
+    btn.innerText = "SIMPAN";
+    return;
+  }
+
+  const data = {
+    jenis: jenis.value,
+    status_kepegawaian: status_kepegawaian.value,
+    nip: nik.value,
+    nama: nama.value,
+    status: status.value,
+    keterangan: keterangan.value,
+    lokasi: lokasi.value,
+    foto: hasilFoto.src,
+    ttd: ttd.toDataURL()
   };
 
-  fetch(SHEET_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(data)
+  if (!data.jenis || !data.nip || !data.nama || !data.status || !data.foto || !data.lokasi) {
+    alert("❗ Semua data wajib diisi");
+    btn.disabled = false;
+    btn.innerText = "SIMPAN";
+    return;
+  }
+
+  fetch(SHEET_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify(data)
   })
-  .then(()=>{ alert("✅ Berhasil"); location.reload(); })
-  .catch(()=>{ alert("❌ Gagal"); btn.disabled=false; });
+  .then(() => {
+    alert("✅ Absensi berhasil");
+    location.reload();
+  })
+  .catch(() => {
+    alert("❌ Gagal mengirim data");
+    btn.disabled = false;
+    btn.innerText = "SIMPAN";
+  });
 }
