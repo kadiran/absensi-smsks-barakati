@@ -2,7 +2,7 @@
 // KONFIGURASI
 // ===============================
 const ADMIN_PASSWORD = "12345"; // 🔴 GANTI PASSWORD ADMIN
-const API_URL = "https://script.google.com/macros/s/AKfycbwHI86dLZQkNHUuz3OHnaZwi0zMs3bPUfQPud1ilYQiZXAri7erC0x3xkLzBggt4luC/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxk8qvZrQSbtHBhE1jEKBBhYk8E8dG4FlEB_pn8BiX-BIGsVetsAEmqRJa2KtSAs-SU/exec";
 
 // ===============================
 let allData = [];
@@ -25,7 +25,7 @@ function login() {
 }
 
 // ===============================
-// INISIAL BULAN
+// INISIAL BULAN (0–11)
 // ===============================
 function initBulan() {
   const bulan = document.getElementById("bulan");
@@ -37,18 +37,18 @@ function initBulan() {
   bulan.innerHTML = "";
   namaBulan.forEach((b, i) => {
     const opt = document.createElement("option");
-    opt.value = i + 1;
+    opt.value = i; // 0–11
     opt.textContent = b;
     bulan.appendChild(opt);
   });
 
-  bulan.value = new Date().getMonth() + 1;
+  bulan.value = new Date().getMonth();
   bulan.disabled = false;
   document.getElementById("tahun").disabled = false;
 }
 
 // ===============================
-// LOAD DATA DARI SHEET
+// LOAD DATA
 // ===============================
 function loadData() {
   document.getElementById("loading").style.display = "block";
@@ -97,9 +97,9 @@ function filterData() {
 
   let no = 1;
   const hasil = allData.filter(d => {
-    const tgl = new Date(d.tanggal);
+    const tgl = new Date(d.waktu); // ✅ BENAR
     return (
-      tgl.getMonth() + 1 == bulan &&
+      tgl.getMonth() == bulan &&
       tgl.getFullYear() == tahun &&
       (nama === "" || d.nama === nama)
     );
@@ -109,7 +109,7 @@ function filterData() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${no++}</td>
-      <td>${new Date(d.tanggal).toLocaleDateString()}</td>
+      <td>${new Date(d.waktu).toLocaleDateString("id-ID")}</td>
       <td>${d.nama}</td>
       <td>${d.status}</td>
       <td>${d.keterangan || "-"}</td>
@@ -158,14 +158,15 @@ function cetakPDFBulanan() {
   const doc = new jsPDF();
 
   doc.text("LAPORAN ABSENSI BULANAN", 14, 15);
+  doc.text("SMSKS Barakati Muna Barat", 14, 22);
 
   doc.autoTable({
-    startY: 20,
+    startY: 30,
     head: [["No","Tanggal","Nama","Status","Keterangan"]],
-    body: [...document.querySelectorAll("#data tr")].map((tr,i) =>
+    body: [...document.querySelectorAll("#data tr")].map(tr =>
       [...tr.children].map(td => td.innerText)
     )
   });
 
-  doc.save("Laporan_Absensi.pdf");
+  doc.save("Laporan_Absensi_Bulanan.pdf");
 }
