@@ -1,130 +1,135 @@
 // ===============================
 // KONFIGURASI
 // ===============================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
 
 // ===============================
-// ELEMENT
+// DETEKSI DEVICE
 // ===============================
-const jenis = document.getElementById("jenis");
-const status_kepegawaian = document.getElementById("status_kepegawaian");
-const nik = document.getElementById("nik");
-const nama = document.getElementById("nama");
-const status = document.getElementById("status");
-const keterangan = document.getElementById("keterangan");
-const lokasi = document.getElementById("lokasi");
-const hasilFoto = document.getElementById("hasilFoto");
-const video = document.getElementById("video");
-const fotoCanvas = document.getElementById("foto");
-const ttd = document.getElementById("ttd");
-const ctxTTD = ttd.getContext("2d");
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 // ===============================
-// CAMERA
-// ===============================
-navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-  .then(stream => video.srcObject = stream)
-  .catch(() => alert("❌ Kamera tidak diizinkan"));
-
-function ambilFoto() {
-  fotoCanvas.width = video.videoWidth;
-  fotoCanvas.height = video.videoHeight;
-  fotoCanvas.getContext("2d").drawImage(video, 0, 0);
-  hasilFoto.src = fotoCanvas.toDataURL("image/jpeg", 0.6);
-}
-
-// ===============================
-// GPS
+// LOKASI
 // ===============================
 function ambilLokasi() {
+  if (!navigator.geolocation) {
+    document.getElementById("lokasi").value = "Tidak didukung";
+    return;
+  }
+
   navigator.geolocation.getCurrentPosition(
-    pos => lokasi.value = pos.coords.latitude + "," + pos.coords.longitude,
-    () => alert("❌ Lokasi tidak aktif")
+    pos => {
+      document.getElementById("lokasi").value =
+        pos.coords.latitude + "," + pos.coords.longitude;
+    },
+    () => {
+      document.getElementById("lokasi").value =
+        isMobile ? "Aktifkan GPS HP" : "Izinkan lokasi browser";
+    },
+    { enableHighAccuracy: true, timeout: 15000 }
   );
 }
 
 // ===============================
-// TTD HP & PC
+// TTD CANVAS
 // ===============================
-let draw = false, x = 0, y = 0;
+const ttd = document.getElementById("ttd");
+const ctxTTD = ttd.getContext("2d");
 
-function resizeTTD() {
-  ttd.width = Math.min(window.innerWidth * 0.9, 400);
-  ttd.height = 200;
-  ctxTTD.lineWidth = 2;
-  ctxTTD.lineCap = "round";
-}
-resizeTTD();
+let menggambar = false;
+let lastX = 0;
+let lastY = 0;
 
-function pos(e) {
-  const r = ttd.getBoundingClientRect();
-  const p = e.touches ? e.touches[0] : e;
-  return { x: p.clientX - r.left, y: p.clientY - r.top };
-}
-
-ttd.addEventListener("mousedown", e => { draw = true; ({ x, y } = pos(e)); });
-ttd.addEventListener("mousemove", e => {
-  if (!draw) return;
-  const p = pos(e);
-  ctxTTD.beginPath();
-  ctxTTD.moveTo(x, y);
-  ctxTTD.lineTo(p.x, p.y);
-  ctxTTD.stroke();
-  x = p.x; y = p.y;
+// Mouse
+ttd.addEventListener("mousedown", e => {
+  menggambar = true;
+  lastX = e.offsetX;
+  lastY = e.offsetY;
 });
-["mouseup","mouseout"].forEach(e => ttd.addEventListener(e, () => draw = false));
+ttd.addEventListener("mousemove", e => {
+  if (!menggambar) return;
+  ctxTTD.beginPath();
+  ctxTTD.moveTo(lastX, lastY);
+  ctxTTD.lineTo(e.offsetX, e.offsetY);
+  ctxTTD.stroke();
+  lastX = e.offsetX;
+  lastY = e.offsetY;
+});
+ttd.addEventListener("mouseup", () => menggambar = false);
+ttd.addEventListener("mouseleave", () => menggambar = false);
 
-ttd.addEventListener("touchstart", e => { e.preventDefault(); draw = true; ({ x, y } = pos(e)); });
+// Touch (HP)
+ttd.addEventListener("touchstart", e => {
+  e.preventDefault();
+  menggambar = true;
+  const t = e.touches[0];
+  const r = ttd.getBoundingClientRect();
+  lastX = t.clientX - r.left;
+  lastY = t.clientY - r.top;
+});
 ttd.addEventListener("touchmove", e => {
   e.preventDefault();
-  if (!draw) return;
-  const p = pos(e);
+  if (!menggambar) return;
+  const t = e.touches[0];
+  const r = ttd.getBoundingClientRect();
+  const x = t.clientX - r.left;
+  const y = t.clientY - r.top;
+
   ctxTTD.beginPath();
-  ctxTTD.moveTo(x, y);
-  ctxTTD.lineTo(p.x, p.y);
+  ctxTTD.moveTo(lastX, lastY);
+  ctxTTD.lineTo(x, y);
   ctxTTD.stroke();
-  x = p.x; y = p.y;
+
+  lastX = x;
+  lastY = y;
 });
-ttd.addEventListener("touchend", () => draw = false);
+ttd.addEventListener("touchend", e => {
+  e.preventDefault();
+  menggambar = false;
+});
 
 // ===============================
-// KIRIM DATA (ANTI FAILED FETCH)
+// HAPUS TTD (SOLUSI FINAL HP)
 // ===============================
-function kirim(btn) {
-  btn.disabled = true;
-  btn.innerText = "Mengirim...";
+function hapusTTD() {
+  menggambar = false;
+  ctxTTD.setTransform(1, 0, 0, 1, 0, 0);
+  ctxTTD.clearRect(0, 0, ttd.width, ttd.height);
 
+  lastX = 0;
+  lastY = 0;
+
+  // 🔥 force stop touch HP
+  ttd.style.pointerEvents = "none";
+  setTimeout(() => {
+    ttd.style.pointerEvents = "auto";
+  }, 50);
+}
+
+// ===============================
+// KIRIM DATA
+// ===============================
+function kirimAbsensi() {
   const data = {
-    jenis: jenis.value,
-    status_kepegawaian: status_kepegawaian.value,
-    nip: nik.value,
-    nama: nama.value,
-    status: status.value,
-    keterangan: keterangan.value,
-    lokasi: lokasi.value,
-    foto: hasilFoto.src,
+    jenis: document.getElementById("jenis").value,
+    status_kepegawaian: document.getElementById("status_kepegawaian").value,
+    nip: document.getElementById("nip").value,
+    nama: document.getElementById("nama").value,
+    status: document.getElementById("status").value,
+    keterangan: document.getElementById("keterangan").value,
+    lokasi: document.getElementById("lokasi").value,
+    foto: document.getElementById("foto").value,
     ttd: ttd.toDataURL()
   };
 
-  if (!data.jenis || !data.nip || !data.nama || !data.status || !data.foto || !data.lokasi) {
-    alert("❗ Semua data wajib diisi");
-    btn.disabled = false;
-    btn.innerText = "SIMPAN";
-    return;
-  }
-
-  fetch(SHEET_URL, {
+  fetch(API_URL, {
     method: "POST",
-    mode: "no-cors",
     body: JSON.stringify(data)
   })
-  .then(() => {
-    alert("✅ Absensi berhasil");
-    location.reload();
-  })
-  .catch(() => {
-    alert("❌ Gagal mengirim data");
-    btn.disabled = false;
-    btn.innerText = "SIMPAN";
-  });
+    .then(res => res.json())
+    .then(() => {
+      alert("✅ Absensi berhasil dikirim");
+      hapusTTD();
+    })
+    .catch(() => alert("❌ Gagal mengirim data"));
 }
