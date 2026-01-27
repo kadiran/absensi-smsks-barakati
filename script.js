@@ -1,7 +1,7 @@
 // ===============================
 // KONFIGURASI
 // ===============================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxxXF1xKxY3YhCESLBLB3-02WFsi-rnAmYKDgDEVHQJAAvNP3AqefApnQHm5ORyexfW/exec"; // Ganti dengan Web App URL baru
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec"; // Ganti dengan Web App URL baru
 
 // ELEMENTS
 const jenis = document.getElementById("jenis");
@@ -101,3 +101,4 @@ function kirim(btn){
   .then(()=>{alert("✅ Absensi berhasil disimpan"); location.reload();})
   .catch(err=>{alert("❌ Gagal mengirim data: "+err); console.error(err); btn.disabled=false; btn.innerText="✅ SIMPAN";});
 }
+
