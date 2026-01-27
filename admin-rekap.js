@@ -3,60 +3,99 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp
 
 let allData = [];
 
-function login() {
-  if (document.getElementById("pass").value !== ADMIN_PASSWORD) {
+// ================= LOGIN =================
+function login(){
+  if(document.getElementById("pass").value !== ADMIN_PASSWORD){
     alert("❌ Password salah");
     return;
   }
   document.getElementById("panel").style.display = "block";
+  document.getElementById("loading").style.display = "block";
   initBulan();
   loadData();
 }
 
-function initBulan() {
+// ================= BULAN =================
+function initBulan(){
   const bulan = document.getElementById("bulan");
+  const nama = ["Januari","Februari","Maret","April","Mei","Juni",
+                "Juli","Agustus","September","Oktober","November","Desember"];
   bulan.innerHTML = "";
-  ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"].forEach((b,i)=>{
+  nama.forEach((b,i)=>{
     bulan.innerHTML += `<option value="${i+1}">${b}</option>`;
   });
-  bulan.value = new Date().getMonth() + 1;
+  bulan.value = new Date().getMonth()+1;
 }
 
-function loadData() {
+// ================= LOAD DATA =================
+function loadData(){
   fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
+    .then(r=>r.json())
+    .then(data=>{
       allData = data;
-      filterData();
+      tampilkan();
+      document.getElementById("loading").style.display = "none";
+    })
+    .catch(()=>{
+      alert("❌ Gagal memuat data");
+      document.getElementById("loading").style.display = "none";
     });
 }
 
-function filterData() {
+// ================= TAMPILKAN =================
+function tampilkan(){
   const bulan = document.getElementById("bulan").value;
   const tahun = document.getElementById("tahun").value;
-  const tbody = document.getElementById("rekapGuru");
+  const tbody = document.getElementById("rekap");
   tbody.innerHTML = "";
 
   const rekap = {};
 
-  allData.forEach(d => {
-    const tgl = new Date(d.waktu); // ✅ FIX PENTING
-    if (tgl.getMonth()+1 == bulan && tgl.getFullYear() == tahun) {
-      if (!rekap[d.nama]) rekap[d.nama] = { Hadir:0, Sakit:0, Izin:0 };
-      if (rekap[d.nama][d.status] !== undefined) rekap[d.nama][d.status]++;
+  allData.forEach(d=>{
+    const t = new Date(d.waktu);
+    if(t.getMonth()+1 == bulan && t.getFullYear() == tahun){
+      if(!rekap[d.nama]){
+        rekap[d.nama] = {Hadir:0,Sakit:0,Izin:0};
+      }
+      if(rekap[d.nama][d.status] !== undefined){
+        rekap[d.nama][d.status]++;
+      }
     }
   });
 
-  Object.keys(rekap).forEach(nama => {
+  Object.keys(rekap).forEach(nama=>{
     const r = rekap[nama];
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${nama}</td>
-      <td>${r.Hadir}</td>
-      <td>${r.Sakit}</td>
-      <td>${r.Izin}</td>
-      <td><b>${r.Hadir + r.Sakit + r.Izin}</b></td>
-    `;
-    tbody.appendChild(tr);
+    tbody.innerHTML += `
+      <tr>
+        <td>${nama}</td>
+        <td>${r.Hadir}</td>
+        <td>${r.Sakit}</td>
+        <td>${r.Izin}</td>
+        <td><b>${r.Hadir + r.Sakit + r.Izin}</b></td>
+      </tr>`;
   });
+}
+
+// ================= REFRESH =================
+function refreshData(){
+  document.getElementById("loading").style.display = "block";
+  loadData();
+}
+
+// ================= CETAK PDF =================
+function cetakPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.text("REKAP ABSENSI BULANAN",14,15);
+
+  doc.autoTable({
+    startY:20,
+    head:[["Nama","Hadir","Sakit","Izin","Total"]],
+    body:[...document.querySelectorAll("#rekap tr")].map(tr =>
+      [...tr.children].map(td => td.innerText)
+    )
+  });
+
+  doc.save("Rekap_Absensi_Bulanan.pdf");
 }
