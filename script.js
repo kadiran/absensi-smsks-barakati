@@ -1,9 +1,11 @@
 // ===============================
 // KONFIGURASI
 // ===============================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec"; // Ganti dengan Web App URL baru
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
 
-// ELEMENTS
+// ===============================
+// ELEMENT
+// ===============================
 const jenis = document.getElementById("jenis");
 const status_kepegawaian = document.getElementById("status_kepegawaian");
 const nik = document.getElementById("nik");
@@ -18,87 +20,111 @@ const ttd = document.getElementById("ttd");
 const ctxTTD = ttd.getContext("2d");
 
 // ===============================
-// CAMERA & FOTO SELFIE (RESIZE + COMPRESS)
-navigator.mediaDevices.getUserMedia({video:true})
-.then(stream => video.srcObject = stream)
-.catch(err => console.error("Tidak bisa akses kamera:", err));
+// CAMERA
+// ===============================
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+  .then(stream => video.srcObject = stream)
+  .catch(() => alert("❌ Kamera tidak diizinkan"));
 
-function ambilFoto(){
-  const max = 400;
-  let w = video.videoWidth;
-  let h = video.videoHeight;
-  if(w>h && w>max){h=h*max/w; w=max;}
-  if(h>w && h>max){w=w*max/h; h=max;}
-  fotoCanvas.width=w; fotoCanvas.height=h;
-  fotoCanvas.getContext("2d").drawImage(video,0,0,w,h);
-  hasilFoto.src=fotoCanvas.toDataURL("image/png",0.7);
+function ambilFoto() {
+  fotoCanvas.width = video.videoWidth;
+  fotoCanvas.height = video.videoHeight;
+  fotoCanvas.getContext("2d").drawImage(video, 0, 0);
+  hasilFoto.src = fotoCanvas.toDataURL("image/jpeg", 0.6);
 }
 
 // ===============================
 // GPS
-function ambilLokasi(){
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>lokasi.value=pos.coords.latitude+","+pos.coords.longitude,
-      err=>{alert("❌ Tidak bisa ambil lokasi"); console.error(err);});
-  }else alert("❌ Browser tidak mendukung GPS");
+// ===============================
+function ambilLokasi() {
+  navigator.geolocation.getCurrentPosition(
+    pos => lokasi.value = pos.coords.latitude + "," + pos.coords.longitude,
+    () => alert("❌ Lokasi tidak aktif")
+  );
 }
 
 // ===============================
-// TTD (PC & HP)
-let menggambar=false, lastX=0,lastY=0;
-function resizeTTD(){
-  const ratio = Math.min(window.innerWidth*0.9,400);
-  ttd.width=ratio; ttd.height=ratio*2/3;
-  ctxTTD.lineWidth=2; ctxTTD.lineCap="round"; ctxTTD.strokeStyle="#000";
-  ctxTTD.clearRect(0,0,ttd.width,ttd.height);
+// TTD HP & PC
+// ===============================
+let draw = false, x = 0, y = 0;
+
+function resizeTTD() {
+  ttd.width = Math.min(window.innerWidth * 0.9, 400);
+  ttd.height = 200;
+  ctxTTD.lineWidth = 2;
+  ctxTTD.lineCap = "round";
 }
-window.addEventListener("resize",resizeTTD); resizeTTD();
+resizeTTD();
 
-function getPos(e){const r=ttd.getBoundingClientRect(); return e.touches?{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top}:{x:e.clientX-r.left,y:e.clientY-r.top};}
-function mulaiTTD(e){menggambar=true; const p=getPos(e); lastX=p.x; lastY=p.y;}
-function gambarTTD(e){if(!menggambar)return; const p=getPos(e); ctxTTD.beginPath(); ctxTTD.moveTo(lastX,lastY); ctxTTD.lineTo(p.x,p.y); ctxTTD.stroke(); lastX=p.x; lastY=p.y;}
-function selesaiTTD(){menggambar=false;}
-function hapusTTD(){ctxTTD.clearRect(0,0,ttd.width,ttd.height);}
+function pos(e) {
+  const r = ttd.getBoundingClientRect();
+  const p = e.touches ? e.touches[0] : e;
+  return { x: p.clientX - r.left, y: p.clientY - r.top };
+}
 
-// EVENT PC & TOUCH
-ttd.addEventListener("mousedown",mulaiTTD); ttd.addEventListener("mousemove",gambarTTD); ttd.addEventListener("mouseup",selesaiTTD); ttd.addEventListener("mouseout",selesaiTTD);
-ttd.addEventListener("touchstart",e=>{e.preventDefault();mulaiTTD(e);});
-ttd.addEventListener("touchmove",e=>{e.preventDefault();gambarTTD(e);});
-ttd.addEventListener("touchend",e=>{e.preventDefault();selesaiTTD();});
+ttd.addEventListener("mousedown", e => { draw = true; ({ x, y } = pos(e)); });
+ttd.addEventListener("mousemove", e => {
+  if (!draw) return;
+  const p = pos(e);
+  ctxTTD.beginPath();
+  ctxTTD.moveTo(x, y);
+  ctxTTD.lineTo(p.x, p.y);
+  ctxTTD.stroke();
+  x = p.x; y = p.y;
+});
+["mouseup","mouseout"].forEach(e => ttd.addEventListener(e, () => draw = false));
+
+ttd.addEventListener("touchstart", e => { e.preventDefault(); draw = true; ({ x, y } = pos(e)); });
+ttd.addEventListener("touchmove", e => {
+  e.preventDefault();
+  if (!draw) return;
+  const p = pos(e);
+  ctxTTD.beginPath();
+  ctxTTD.moveTo(x, y);
+  ctxTTD.lineTo(p.x, p.y);
+  ctxTTD.stroke();
+  x = p.x; y = p.y;
+});
+ttd.addEventListener("touchend", () => draw = false);
 
 // ===============================
-// KIRIM DATA
-function kirim(btn){
-  btn.disabled=true; btn.innerText="⏳ Mengirim...";
-  document.activeElement.blur();
+// KIRIM DATA (ANTI FAILED FETCH)
+// ===============================
+function kirim(btn) {
+  btn.disabled = true;
+  btn.innerText = "Mengirim...";
 
-  const data={
-    waktu:new Date().toISOString(),
-    jenis:jenis.value.trim(),
-    status_kepegawaian:status_kepegawaian.value.trim(),
-    nip:nik.value.trim(),
-    nama:nama.value.trim(),
-    status:status.value.trim(),
-    keterangan:keterangan.value.trim(),
-    lokasi:lokasi.value.trim(),
-    foto:hasilFoto.src||"",
-    ttd:ttd.toDataURL()
+  const data = {
+    jenis: jenis.value,
+    status_kepegawaian: status_kepegawaian.value,
+    nip: nik.value,
+    nama: nama.value,
+    status: status.value,
+    keterangan: keterangan.value,
+    lokasi: lokasi.value,
+    foto: hasilFoto.src,
+    ttd: ttd.toDataURL()
   };
 
-  if(!data.jenis||!data.status_kepegawaian||!data.nip||!data.nama||!data.status||!data.foto||!data.lokasi){
-    alert("❗ Semua data wajib diisi"); btn.disabled=false; btn.innerText="✅ SIMPAN"; return;
-  }
-  if((data.status==="Sakit"||data.status==="Izin")&&!data.keterangan){
-    alert("❗ Keterangan wajib diisi"); btn.disabled=false; btn.innerText="✅ SIMPAN"; return;
+  if (!data.jenis || !data.nip || !data.nama || !data.status || !data.foto || !data.lokasi) {
+    alert("❗ Semua data wajib diisi");
+    btn.disabled = false;
+    btn.innerText = "SIMPAN";
+    return;
   }
 
-  fetch(SHEET_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(data)
+  fetch(SHEET_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify(data)
   })
-  .then(res=>res.json())
-  .then(()=>{alert("✅ Absensi berhasil disimpan"); location.reload();})
-  .catch(err=>{alert("❌ Gagal mengirim data: "+err); console.error(err); btn.disabled=false; btn.innerText="✅ SIMPAN";});
+  .then(() => {
+    alert("✅ Absensi berhasil");
+    location.reload();
+  })
+  .catch(() => {
+    alert("❌ Gagal mengirim data");
+    btn.disabled = false;
+    btn.innerText = "SIMPAN";
+  });
 }
-
