@@ -17,19 +17,21 @@ function loadData() {
     .then(r => r.json())
     .then(d => {
       allData = d;
-      tampilData();
+      render();
     })
     .catch(() => alert("❌ Gagal memuat data"));
 }
 
-function tampilData() {
-  const tbody = document.getElementById("dataAbsensi");
+function render() {
+  const tbody = document.getElementById("data");
   tbody.innerHTML = "";
+  let no = 1;
 
   allData.forEach(d => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${new Date(d.waktu).toLocaleString()}</td>
+      <td>${no++}</td>
+      <td>${new Date(d.waktu).toLocaleDateString("id-ID")}</td>
       <td>${d.nama}</td>
       <td>${d.status}</td>
       <td>${d.keterangan || "-"}</td>
