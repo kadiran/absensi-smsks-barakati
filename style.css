@@ -179,3 +179,32 @@ td{
     font-size:14px;
   }
 }
+/* ===============================
+   CANVAS TTD (HP & LAPTOP)
+   =============================== */
+#ttd {
+  border: 2px solid #000;
+  width: 100%;
+  max-width: 400px;
+  height: 200px;
+  background: #fff;
+
+  /* PENTING AGAR TIDAK SCROLL SAAT TTD */
+  touch-action: none;
+}
+
+/* Tombol ulangi TTD */
+.btn-ttd {
+  margin-top: 6px;
+  padding: 6px 12px;
+  background: #f39c12;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-ttd:hover {
+  opacity: 0.9;
+}
+
