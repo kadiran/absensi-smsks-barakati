@@ -13,19 +13,34 @@ const nama = document.getElementById("nama");
 const status = document.getElementById("status");
 const keterangan = document.getElementById("keterangan");
 const lokasi = document.getElementById("lokasi");
-const hasilFoto = document.getElementById("hasilFoto");
+
 const video = document.getElementById("video");
 const fotoCanvas = document.getElementById("foto");
+const hasilFoto = document.getElementById("hasilFoto");
+
 const ttd = document.getElementById("ttd");
 const ctxTTD = ttd.getContext("2d");
 
 // ===============================
-// CAMERA
+// MODE DEVICE
 // ===============================
-navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-  .then(stream => video.srcObject = stream)
-  .catch(() => alert("❌ Kamera tidak diizinkan"));
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+// ===============================
+// CAMERA (HP & LAPTOP)
+// ===============================
+navigator.mediaDevices.getUserMedia({
+  video: { facingMode: isMobile ? "user" : "environment" }
+})
+.then(stream => {
+  video.srcObject = stream;
+  video.play();
+})
+.catch(() => alert("❌ Kamera tidak diizinkan"));
+
+// ===============================
+// AMBIL FOTO
+// ===============================
 function ambilFoto() {
   fotoCanvas.width = video.videoWidth;
   fotoCanvas.height = video.videoHeight;
@@ -34,19 +49,35 @@ function ambilFoto() {
 }
 
 // ===============================
-// GPS
+// GPS (AMAN LAPTOP & HP)
 // ===============================
 function ambilLokasi() {
+  if (!navigator.geolocation) {
+    alert("❌ GPS tidak didukung");
+    return;
+  }
+
   navigator.geolocation.getCurrentPosition(
-    pos => lokasi.value = pos.coords.latitude + "," + pos.coords.longitude,
-    () => alert("❌ Lokasi tidak aktif")
+    pos => {
+      lokasi.value = pos.coords.latitude + "," + pos.coords.longitude;
+    },
+    err => {
+      alert("❌ Lokasi gagal, pastikan HTTPS & izin diaktifkan");
+      console.error(err);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000
+    }
   );
 }
 
 // ===============================
-// TTD HP & PC
+// TTD (HP & LAPTOP)
 // ===============================
-let draw = false, x = 0, y = 0;
+let draw = false;
+let x = 0;
+let y = 0;
 
 function resizeTTD() {
   ttd.width = Math.min(window.innerWidth * 0.9, 400);
@@ -55,40 +86,66 @@ function resizeTTD() {
   ctxTTD.lineCap = "round";
 }
 resizeTTD();
+window.addEventListener("resize", resizeTTD);
 
-function pos(e) {
-  const r = ttd.getBoundingClientRect();
+function posisi(e) {
+  const rect = ttd.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
-  return { x: p.clientX - r.left, y: p.clientY - r.top };
+  return {
+    x: p.clientX - rect.left,
+    y: p.clientY - rect.top
+  };
 }
 
-ttd.addEventListener("mousedown", e => { draw = true; ({ x, y } = pos(e)); });
+// MOUSE
+ttd.addEventListener("mousedown", e => {
+  draw = true;
+  ({ x, y } = posisi(e));
+});
 ttd.addEventListener("mousemove", e => {
   if (!draw) return;
-  const p = pos(e);
+  const p = posisi(e);
   ctxTTD.beginPath();
   ctxTTD.moveTo(x, y);
   ctxTTD.lineTo(p.x, p.y);
   ctxTTD.stroke();
-  x = p.x; y = p.y;
+  x = p.x;
+  y = p.y;
 });
-["mouseup","mouseout"].forEach(e => ttd.addEventListener(e, () => draw = false));
+["mouseup", "mouseleave"].forEach(ev =>
+  ttd.addEventListener(ev, () => draw = false)
+);
 
-ttd.addEventListener("touchstart", e => { e.preventDefault(); draw = true; ({ x, y } = pos(e)); });
+// TOUCH
+ttd.addEventListener("touchstart", e => {
+  e.preventDefault();
+  draw = true;
+  ({ x, y } = posisi(e));
+});
 ttd.addEventListener("touchmove", e => {
   e.preventDefault();
   if (!draw) return;
-  const p = pos(e);
+  const p = posisi(e);
   ctxTTD.beginPath();
   ctxTTD.moveTo(x, y);
   ctxTTD.lineTo(p.x, p.y);
   ctxTTD.stroke();
-  x = p.x; y = p.y;
+  x = p.x;
+  y = p.y;
 });
 ttd.addEventListener("touchend", () => draw = false);
 
 // ===============================
-// KIRIM DATA (ANTI FAILED FETCH)
+// RESET / ULANGI TTD (INI KUNCI)
+// ===============================
+function resetTTD() {
+  ctxTTD.clearRect(0, 0, ttd.width, ttd.height);
+  ctxTTD.beginPath();
+  draw = false;
+}
+
+// ===============================
+// KIRIM DATA
 // ===============================
 function kirim(btn) {
   btn.disabled = true;
@@ -120,6 +177,7 @@ function kirim(btn) {
   })
   .then(() => {
     alert("✅ Absensi berhasil");
+    resetTTD();
     location.reload();
   })
   .catch(() => {
