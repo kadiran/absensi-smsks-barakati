@@ -1,33 +1,62 @@
-const ADMIN_PASSWORD="12345";
-const API_URL="https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
-let allData=[];
+const ADMIN_PASSWORD = "12345";
+const API_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
 
-function login(){
-  if(pass.value!==ADMIN_PASSWORD) return alert("❌ Salah");
-  panel.style.display="block";
-  fetch(API_URL).then(r=>r.json()).then(d=>{allData=d;filterData();});
+let allData = [];
+
+function login() {
+  if (document.getElementById("pass").value !== ADMIN_PASSWORD) {
+    alert("❌ Password salah");
+    return;
+  }
+  document.getElementById("panel").style.display = "block";
+  initBulan();
+  loadData();
 }
 
-function filterData(){
-  const b=bulan.value,t=tahun.value;
-  const r={};
-  allData.forEach(x=>{
-    const d=new Date(x.waktu);
-    if(d.getMonth()+1==b&&d.getFullYear()==t){
-      if(!r[x.nama])r[x.nama]={Hadir:0,Sakit:0,Izin:0};
-      if(r[x.nama][x.status]!=null)r[x.nama][x.status]++;
+function initBulan() {
+  const bulan = document.getElementById("bulan");
+  bulan.innerHTML = "";
+  ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"].forEach((b,i)=>{
+    bulan.innerHTML += `<option value="${i+1}">${b}</option>`;
+  });
+  bulan.value = new Date().getMonth() + 1;
+}
+
+function loadData() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
+      filterData();
+    });
+}
+
+function filterData() {
+  const bulan = document.getElementById("bulan").value;
+  const tahun = document.getElementById("tahun").value;
+  const tbody = document.getElementById("rekapGuru");
+  tbody.innerHTML = "";
+
+  const rekap = {};
+
+  allData.forEach(d => {
+    const tgl = new Date(d.waktu); // ✅ FIX PENTING
+    if (tgl.getMonth()+1 == bulan && tgl.getFullYear() == tahun) {
+      if (!rekap[d.nama]) rekap[d.nama] = { Hadir:0, Sakit:0, Izin:0 };
+      if (rekap[d.nama][d.status] !== undefined) rekap[d.nama][d.status]++;
     }
   });
-  rekapGuru.innerHTML="";
-  Object.keys(r).forEach(n=>{
-    const x=r[n];
-    rekapGuru.innerHTML+=`
-      <tr>
-        <td>${n}</td>
-        <td>${x.Hadir}</td>
-        <td>${x.Sakit}</td>
-        <td>${x.Izin}</td>
-        <td>${x.Hadir+x.Sakit+x.Izin}</td>
-      </tr>`;
+
+  Object.keys(rekap).forEach(nama => {
+    const r = rekap[nama];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${nama}</td>
+      <td>${r.Hadir}</td>
+      <td>${r.Sakit}</td>
+      <td>${r.Izin}</td>
+      <td><b>${r.Hadir + r.Sakit + r.Izin}</b></td>
+    `;
+    tbody.appendChild(tr);
   });
 }
