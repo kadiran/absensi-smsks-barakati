@@ -14,23 +14,22 @@ function login() {
 
 function loadData() {
   fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
-      allData = data;
-      tampilkanData();
+    .then(r => r.json())
+    .then(d => {
+      allData = d;
+      tampilData();
     })
-    .catch(() => alert("❌ Gagal ambil data"));
+    .catch(() => alert("❌ Gagal memuat data"));
 }
 
-function tampilkanData() {
-  const tbody = document.getElementById("data");
+function tampilData() {
+  const tbody = document.getElementById("dataAbsensi");
   tbody.innerHTML = "";
 
-  allData.forEach((d, i) => {
+  allData.forEach(d => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${new Date(d.waktu).toLocaleString("id-ID")}</td>
+      <td>${new Date(d.waktu).toLocaleString()}</td>
       <td>${d.nama}</td>
       <td>${d.status}</td>
       <td>${d.keterangan || "-"}</td>
