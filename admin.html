@@ -2,79 +2,41 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Absensi SMSKS</title>
+<title>Admin Rekap Absensi</title>
+<link rel="stylesheet" href="style.css">
 
-<style>
-body{font-family:Arial;background:#f4f6f8}
-header{background:#0a5ed7;color:#fff;padding:12px;text-align:center;font-weight:bold}
-.container{background:#fff;max-width:1100px;margin:15px auto;padding:15px;border-radius:6px}
-label{font-weight:bold;margin-top:10px;display:block}
-select,input,button{padding:7px;width:100%;margin-top:5px}
-button{cursor:pointer;border:none;border-radius:4px}
-.btn{width:auto;padding:8px 12px;margin-right:5px}
-.btn-primary{background:#0a5ed7;color:#fff}
-.btn-warning{background:#f0ad4e;color:#000}
-.btn-success{background:#5cb85c;color:#fff}
-table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{border:1px solid #ccc;padding:6px;text-align:center}
-th{background:#0a5ed7;color:#fff}
-#loading{display:none;margin-top:10px}
-</style>
-
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 </head>
+
 <body>
 
-<header>ADMIN ABSENSI ONLINE SMSKS BARAKATI</header>
+<h2 class="judul">ADMIN REKAP ABSENSI</h2>
 
-<div class="container">
+<div class="filter">
+  <label>Bulan:</label>
+  <select id="bulan"></select>
 
-  <label>Password Admin</label>
-  <input type="password" id="pass" placeholder="Masukkan password admin">
-  <button class="btn btn-primary" onclick="login()">LOGIN</button>
+  <label>Tahun:</label>
+  <input type="number" id="tahun" value="2026">
 
-  <div id="loading">⏳ Memuat data...</div>
-
-  <div id="panel" style="display:none">
-
-    <hr>
-
-    <label>Bulan</label>
-    <select id="bulan"></select>
-
-    <label>Tahun</label>
-    <input id="tahun" type="number" value="2026">
-
-    <label>Nama</label>
-    <select id="filterNama">
-      <option value="">Semua</option>
-    </select>
-
-    <br><br>
-
-    <button class="btn btn-primary" onclick="tampilkan()">🔍 Tampilkan</button>
-    <button class="btn btn-warning" onclick="refreshData()">🔄 Refresh</button>
-    <button class="btn btn-success" onclick="cetakPDF()">🖨️ CETAK PDF BULANAN</button>
-
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Tanggal</th>
-          <th>Nama</th>
-          <th>Status Kehadiran</th>
-          <th>Keterangan</th>
-        </tr>
-      </thead>
-      <tbody id="data"></tbody>
-    </table>
-
-  </div>
+  <button onclick="tampilkan()">🔍 Tampilkan</button>
+  <button onclick="refresh()">🔄 Refresh</button>
+  <button onclick="cetakPDF()">🖨️ CETAK PDF</button>
 </div>
+
+<table id="tabel">
+<thead>
+<tr>
+  <th>No</th>
+  <th>Tanggal</th>
+  <th>Nama</th>
+  <th>Status</th>
+  <th>Keterangan</th>
+</tr>
+</thead>
+<tbody id="data"></tbody>
+</table>
 
 <script src="admin.js"></script>
 </body>
