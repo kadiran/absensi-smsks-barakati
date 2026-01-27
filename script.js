@@ -1,150 +1,102 @@
-/* ======================================================
-   KONFIGURASI
-====================================================== */
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxk8qvZrQSbtHBhE1jEKBBhYk8E8dG4FlEB_pn8BiX-BIGsVetsAEmqRJa2KtSAs-SU/exec";
+// ===============================
+// TANDA TANGAN DIGITAL (PC & HP)
+// ===============================
+const ttd = document.getElementById("ttd");
+const ctx = ttd.getContext("2d");
 
-let stream;
-let fotoBase64 = "";
-
-/* ======================================================
-   AKSES KAMERA
-====================================================== */
-navigator.mediaDevices.getUserMedia({ video: true })
-.then(s => {
-  stream = s;
-  document.getElementById("video").srcObject = stream;
-})
-.catch(() => alert("❌ Kamera tidak dapat diakses"));
-
-/* ======================================================
-   AMBIL FOTO
-====================================================== */
-function ambilFoto() {
-  const video = document.getElementById("video");
-  const canvas = document.getElementById("foto");
-  const img = document.getElementById("hasilFoto");
-
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext("2d").drawImage(video, 0, 0);
-
-  fotoBase64 = canvas.toDataURL("image/png");
-  img.src = fotoBase64;
-}
-
-/* ======================================================
-   TANDA TANGAN
-====================================================== */
-const ttdCanvas = document.getElementById("ttd");
-const ttdCtx = ttdCanvas.getContext("2d");
 let menggambar = false;
+let lastX = 0;
+let lastY = 0;
 
-ttdCanvas.addEventListener("mousedown", () => menggambar = true);
-ttdCanvas.addEventListener("mouseup", () => {
-  menggambar = false;
-  ttdCtx.beginPath();
-});
-ttdCanvas.addEventListener("mousemove", e => {
+// ===============================
+// Resize canvas responsive
+// ===============================
+function resizeCanvasTTD() {
+  const ratio = Math.min(window.innerWidth * 0.9, 400); // max 400px lebar
+  ttd.width = ratio;
+  ttd.height = ratio * 2/3; // proporsi TTD
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#000";
+  ctx.clearRect(0,0,ttd.width,ttd.height);
+}
+window.addEventListener("resize", resizeCanvasTTD);
+resizeCanvasTTD();
+
+// ===============================
+// MULAI TTD
+// ===============================
+function mulaiTTD(e) {
+  menggambar = true;
+  const pos = getPos(e);
+  lastX = pos.x;
+  lastY = pos.y;
+}
+
+// ===============================
+// GAMBAR TTD
+// ===============================
+function gambarTTD(e) {
   if (!menggambar) return;
-  ttdCtx.lineWidth = 2;
-  ttdCtx.lineCap = "round";
-  ttdCtx.strokeStyle = "#000";
-  ttdCtx.lineTo(e.offsetX, e.offsetY);
-  ttdCtx.stroke();
-  ttdCtx.beginPath();
-  ttdCtx.moveTo(e.offsetX, e.offsetY);
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX,lastY);
+  ctx.lineTo(pos.x,pos.y);
+  ctx.stroke();
+  lastX = pos.x;
+  lastY = pos.y;
+}
+
+// ===============================
+// SELESAI TTD
+// ===============================
+function selesaiTTD() {
+  menggambar = false;
+}
+
+// ===============================
+// DAPATKAN POSISI MOUSE / TOUCH
+// ===============================
+function getPos(e){
+  const rect = ttd.getBoundingClientRect();
+  let x,y;
+  if(e.touches){
+    x = e.touches[0].clientX - rect.left;
+    y = e.touches[0].clientY - rect.top;
+  } else {
+    x = e.clientX - rect.left;
+    y = e.clientY - rect.top;
+  }
+  return {x, y};
+}
+
+// ===============================
+// HAPUS TTD
+// ===============================
+function hapusTTD(){
+  ctx.clearRect(0,0,ttd.width,ttd.height);
+}
+
+// ===============================
+// EVENT LISTENER PC
+// ===============================
+ttd.addEventListener("mousedown", mulaiTTD);
+ttd.addEventListener("mousemove", gambarTTD);
+ttd.addEventListener("mouseup", selesaiTTD);
+ttd.addEventListener("mouseout", selesaiTTD);
+
+// ===============================
+// EVENT LISTENER TOUCH (HP/Tablet)
+// ===============================
+ttd.addEventListener("touchstart", e=>{
+  e.preventDefault();
+  mulaiTTD(e);
 });
-
-function hapusTTD() {
-  ttdCtx.clearRect(0, 0, ttdCanvas.width, ttdCanvas.height);
-}
-
-/* ======================================================
-   AMBIL LOKASI GPS
-====================================================== */
-function ambilLokasi() {
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      document.getElementById("lokasi").value =
-        pos.coords.latitude + ", " + pos.coords.longitude;
-    },
-    () => alert("❌ Lokasi tidak dapat diakses")
-  );
-}
-
-/* ======================================================
-   KIRIM ABSENSI
-====================================================== */
-function kirim(btn) {
-
-  const jenis = document.getElementById("jenis").value.trim();
-  const statusKepeg = document.getElementById("status_kepegawaian").value.trim();
-  const nip = document.getElementById("nik").value.trim();
-  const nama = document.getElementById("nama").value.trim();
-  const status = document.getElementById("status").value.trim();
-  const keterangan = document.getElementById("keterangan").value.trim();
-  const lokasi = document.getElementById("lokasi").value.trim();
-  const foto = document.getElementById("hasilFoto").src || "";
-
-  /* ===== VALIDASI ===== */
-  if (!jenis || !statusKepeg || !nip || !nama || !status) {
-    alert("❗ Semua field bertanda * wajib diisi");
-    return;
-  }
-
-  if ((status === "Sakit" || status === "Izin") && !keterangan) {
-    alert("❗ Keterangan wajib diisi jika Sakit / Izin");
-    return;
-  }
-
-  if (!foto) {
-    alert("❗ Foto selfie belum diambil");
-    return;
-  }
-
-  const ttdKosong = ttdCtx
-    .getImageData(0, 0, ttdCanvas.width, ttdCanvas.height)
-    .data.every(v => v === 0);
-
-  if (ttdKosong) {
-    alert("❗ Tanda tangan belum diisi");
-    return;
-  }
-
-  if (!lokasi) {
-    alert("❗ Lokasi belum diambil");
-    return;
-  }
-
-  /* ===== KIRIM DATA ===== */
-  btn.disabled = true;
-  btn.innerText = "⏳ Mengirim...";
-
-  const data = {
-    waktu: new Date().toISOString(),
-    jenis,
-    status_kepegawaian: statusKepeg,
-    nip,
-    nama,
-    status,
-    keterangan,
-    lokasi,
-    foto,
-    ttd: ttdCanvas.toDataURL("image/png")
-  };
-
-  fetch(SHEET_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(() => {
-    alert("✅ Absensi berhasil disimpan");
-    location.reload();
-  })
-  .catch(() => {
-    alert("❌ Gagal mengirim data");
-    btn.disabled = false;
-    btn.innerText = "✅ SIMPAN ABSENSI";
-  });
-}
+ttd.addEventListener("touchmove", e=>{
+  e.preventDefault();
+  gambarTTD(e);
+});
+ttd.addEventListener("touchend", e=>{
+  e.preventDefault();
+  selesaiTTD();
+});
