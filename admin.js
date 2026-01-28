@@ -197,7 +197,7 @@ async function cetakPDF(){
 const y = doc.lastAutoTable.finalY + 8;
 
 doc.setFont("times","normal");
-doc.setFontSize(10);
+doc.setFontSize(12);
 
 doc.text("Bungkolo, 29 Januari 2026", 140, y);
 doc.text("Mengetahui,", 140, y + 4);
@@ -210,6 +210,7 @@ doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 26);
 
   doc.save("Rekap_Absensi_SMKS_Barakati.pdf");
 }
+
 
 
 
