@@ -137,8 +137,8 @@ function loadImage(src){
 // CETAK PDF RESMI SEKOLAH
 // ===============================
 async function cetakPDF(){
-
-  if(document.querySelectorAll("#data tr").length === 0){
+  const rows = document.querySelectorAll("#data tr");
+  if(rows.length === 0){
     alert("❗ Data kosong, tidak bisa dicetak");
     return;
   }
@@ -146,24 +146,16 @@ async function cetakPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p","mm","a4");
 
-  try{
-    const logoKiri  = await loadImage("logo_kiri.png");
-    const logoKanan = await loadImage("logo_kanan.png");
+  // ================= LOGO (BASE64 - AMAN)
+  doc.addImage(LOGO_KIRI_BASE64, "PNG", 15, 10, 20, 20);
+  doc.addImage(LOGO_KANAN_BASE64, "PNG", 175, 10, 20, 20);
 
-    doc.addImage(logoKiri,  "PNG", 15, 10, 20, 20);
-    doc.addImage(logoKanan, "PNG", 175, 10, 20, 20);
-  }catch(e){
-    alert("❌ Logo tidak ditemukan. Pastikan logo_kiri.png & logo_kanan.png ada di folder yang sama");
-    return;
-  }
-
-  // ===== KOP =====
+  // ================= KOP SEKOLAH
   doc.setFont("times","bold");
   doc.setFontSize(12);
   doc.text("PEMERINTAH PROVINSI SULAWESI TENGGARA",105,15,{align:"center"});
   doc.text("DINAS PENDIDIKAN DAN KEBUDAYAAN",105,21,{align:"center"});
   doc.text("SEKOLAH MENENGAH KEJURUAN",105,27,{align:"center"});
-
   doc.setFontSize(14);
   doc.text("SMKS BARAKATI MUNA BARAT",105,33,{align:"center"});
 
@@ -171,45 +163,61 @@ async function cetakPDF(){
   doc.setFontSize(9);
   doc.text(
     "Jl. Pendidikan Desa Bungkolo, Kecamatan Barangka, Kabupaten Muna Barat\n" +
-    "Telp/Hp. 0821 9613 6833 | Email : smk.barakati@yahoo.com",
+    "Telp/Hp. 0821 9613 6833 | Email: smk.barakati@yahoo.com",
     105,40,{align:"center"}
   );
 
   doc.line(15,45,195,45);
 
-  // ===== JUDUL =====
+  // ================= JUDUL
   doc.setFont("times","bold");
   doc.setFontSize(12);
   doc.text("REKAP ABSENSI BULANAN",105,55,{align:"center"});
 
-  // ===== TABEL =====
+  // ================= TABEL
   doc.autoTable({
     startY: 60,
     head: [["No","Tanggal","Nama","Status","Keterangan"]],
-    body: [...document.querySelectorAll("#data tr")].map(tr =>
+    body: [...rows].map(tr =>
       [...tr.children].map(td => td.innerText)
     ),
     styles:{ fontSize:9 }
   });
 
-  // ===== TTD =====
-// ===== TANDA TANGAN KEPALA SEKOLAH (STANDAR SEKOLAH) =====
-const y = doc.lastAutoTable.finalY + 12;
+  // ================= TANGGAL OTOMATIS SESUAI FILTER
+  const bulanNama = [
+    "Januari","Februari","Maret","April","Mei","Juni",
+    "Juli","Agustus","September","Oktober","November","Desember"
+  ];
 
-doc.setFont("times", "normal");
-doc.setFontSize(10);
+  const bulan = document.getElementById("bulan").value;
+  const tahun = document.getElementById("tahun").value;
 
-doc.text("Bungkolo, 29 Januari 2026", 140, y);
-doc.text("Mengetahui,", 140, y + 6);
-doc.text("Kepala Sekolah", 140, y + 12);
+  const tanggalCetak = `Bungkolo, 29 ${bulanNama[bulan-1]} ${tahun}`;
 
-// ruang tanda tangan (standar surat dinas)
-doc.text("Muhammad Ali", 140, y + 30);
-doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 36);
+  // ================= TANDA TANGAN (KANAN)
+  const y = doc.lastAutoTable.finalY + 12;
 
+  doc.setFont("times","normal");
+  doc.setFontSize(10);
+  doc.text(tanggalCetak, 140, y);
+  doc.text("Mengetahui,", 140, y + 5);
+  doc.text("Kepala Sekolah", 140, y + 10);
 
+  // gambar tanda tangan
+  try{
+    doc.addImage("ttd_kepsek.png","PNG",138, y + 13, 40, 18);
+  }catch(e){
+    alert("❗ Gambar tanda tangan tidak ditemukan");
+  }
+
+  doc.text("Muhammad Ali", 140, y + 35);
+  doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 40);
+
+  // ================= SIMPAN
   doc.save("Rekap_Absensi_SMKS_Barakati.pdf");
 }
+
 
 
 
