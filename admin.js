@@ -193,23 +193,24 @@ async function cetakPDF(){
   });
 
   // ===== TTD =====
- // ===== TANDA TANGAN KEPALA SEKOLAH (SANGAT RAPAT) =====
-const y = doc.lastAutoTable.finalY + 8;
+// ===== TANDA TANGAN KEPALA SEKOLAH (STANDAR SEKOLAH) =====
+const y = doc.lastAutoTable.finalY + 12;
 
-doc.setFont("times","normal");
-doc.setFontSize(12);
+doc.setFont("times", "normal");
+doc.setFontSize(10);
 
 doc.text("Bungkolo, 29 Januari 2026", 140, y);
 doc.text("Mengetahui,", 140, y + 6);
-doc.text("Kepala Sekolah", 140, y + 10);
+doc.text("Kepala Sekolah", 140, y + 12);
 
-// area tanda tangan (dipadatkan)
-doc.text("Muhammad Ali", 140, y + 22);
-doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 26);
+// ruang tanda tangan (standar surat dinas)
+doc.text("Muhammad Ali", 140, y + 30);
+doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 36);
 
 
   doc.save("Rekap_Absensi_SMKS_Barakati.pdf");
 }
+
 
 
 
