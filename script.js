@@ -1,11 +1,4 @@
-// ===============================
-// KONFIGURASI
-// ===============================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwTqSOV-uhzwizynhuiKdUp6P1aGQA-6CktCVGMAmN0gndTzkEQJecHrXxuT_5c9e1r/exec";
-
-// ===============================
-// ELEMENT
-// ===============================
+// Element
 const jenis = document.getElementById("jenis");
 const status_kepegawaian = document.getElementById("status_kepegawaian");
 const nik = document.getElementById("nik");
@@ -19,12 +12,12 @@ const fotoCanvas = document.getElementById("foto");
 const ttd = document.getElementById("ttd");
 const ctxTTD = ttd.getContext("2d");
 
-// ===============================
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyvAOO76Gwf27nhF9mTJZ_H62VFiGC--ffeG8DHT2N2w2E11MF9NL4d21HeXU6KKfNp/exec"; // ganti dengan URL Script Google Sheet Anda
+
 // CAMERA
-// ===============================
 navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-  .then(stream => video.srcObject = stream)
-  .catch(() => alert("❌ Kamera tidak diizinkan"));
+.then(stream => video.srcObject = stream)
+.catch(()=> alert("❌ Kamera tidak diizinkan"));
 
 function ambilFoto() {
   fotoCanvas.width = video.videoWidth;
@@ -33,9 +26,7 @@ function ambilFoto() {
   hasilFoto.src = fotoCanvas.toDataURL("image/jpeg", 0.6);
 }
 
-// ===============================
 // GPS
-// ===============================
 function ambilLokasi() {
   navigator.geolocation.getCurrentPosition(
     pos => lokasi.value = pos.coords.latitude + "," + pos.coords.longitude,
@@ -43,77 +34,38 @@ function ambilLokasi() {
   );
 }
 
-// ===============================
-// TTD (HP & PC) — FINAL
-// ===============================
-let drawing = false, x = 0, y = 0;
-
+// TTD
+let drawing = false, x=0, y=0;
 ctxTTD.lineWidth = 2;
 ctxTTD.lineCap = "round";
 ctxTTD.strokeStyle = "#000";
 
 function hapusTTD() {
-  ctxTTD.clearRect(0, 0, ttd.width, ttd.height);
+  ctxTTD.clearRect(0,0,ttd.width,ttd.height);
 }
 
-// posisi
 function posisi(e) {
   const r = ttd.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
   return { x: p.clientX - r.left, y: p.clientY - r.top };
 }
 
-// PC
-ttd.addEventListener("mousedown", e => {
-  drawing = true;
-  ({ x, y } = posisi(e));
-});
+ttd.addEventListener("mousedown", e => { drawing=true; ({x,y}=posisi(e)); });
+ttd.addEventListener("mousemove", e => { if(!drawing) return; const p=posisi(e); ctxTTD.beginPath(); ctxTTD.moveTo(x,y); ctxTTD.lineTo(p.x,p.y); ctxTTD.stroke(); x=p.x;y=p.y; });
+["mouseup","mouseleave"].forEach(ev => ttd.addEventListener(ev,()=>drawing=false));
 
-ttd.addEventListener("mousemove", e => {
-  if (!drawing) return;
-  const p = posisi(e);
-  ctxTTD.beginPath();
-  ctxTTD.moveTo(x, y);
-  ctxTTD.lineTo(p.x, p.y);
-  ctxTTD.stroke();
-  x = p.x; y = p.y;
-});
+ttd.addEventListener("touchstart", e=>{ e.preventDefault(); drawing=true; ({x,y}=posisi(e)); });
+ttd.addEventListener("touchmove", e=>{ e.preventDefault(); if(!drawing) return; const p=posisi(e); ctxTTD.beginPath(); ctxTTD.moveTo(x,y); ctxTTD.lineTo(p.x,p.y); ctxTTD.stroke(); x=p.x;y=p.y; });
+ttd.addEventListener("touchend", ()=>drawing=false);
 
-["mouseup", "mouseleave"].forEach(ev =>
-  ttd.addEventListener(ev, () => drawing = false)
-);
-
-// HP
-ttd.addEventListener("touchstart", e => {
-  e.preventDefault();
-  drawing = true;
-  ({ x, y } = posisi(e));
-});
-
-ttd.addEventListener("touchmove", e => {
-  e.preventDefault();
-  if (!drawing) return;
-  const p = posisi(e);
-  ctxTTD.beginPath();
-  ctxTTD.moveTo(x, y);
-  ctxTTD.lineTo(p.x, p.y);
-  ctxTTD.stroke();
-  x = p.x; y = p.y;
-});
-
-ttd.addEventListener("touchend", () => drawing = false);
-
-// ===============================
 // KIRIM DATA
-// ===============================
 function kirim(btn) {
   btn.disabled = true;
   btn.innerText = "Mengirim...";
 
-  if ((status.value === "Sakit" || status.value === "Izin") && !keterangan.value.trim()) {
+  if((status.value==="Sakit"||status.value==="Izin") && !keterangan.value.trim()) {
     alert("❗ Keterangan wajib diisi");
-    btn.disabled = false;
-    btn.innerText = "SIMPAN";
+    btn.disabled=false; btn.innerText="SIMPAN";
     return;
   }
 
@@ -129,10 +81,9 @@ function kirim(btn) {
     ttd: ttd.toDataURL()
   };
 
-  if (!data.jenis || !data.nip || !data.nama || !data.status || !data.foto || !data.lokasi) {
+  if(!data.jenis || !data.nip || !data.nama || !data.status || !data.foto || !data.lokasi) {
     alert("❗ Semua data wajib diisi");
-    btn.disabled = false;
-    btn.innerText = "SIMPAN";
+    btn.disabled=false; btn.innerText="SIMPAN";
     return;
   }
 
@@ -141,13 +92,6 @@ function kirim(btn) {
     mode: "no-cors",
     body: JSON.stringify(data)
   })
-  .then(() => {
-    alert("✅ Absensi berhasil");
-    location.reload();
-  })
-  .catch(() => {
-    alert("❌ Gagal mengirim data");
-    btn.disabled = false;
-    btn.innerText = "SIMPAN";
-  });
+  .then(()=> { alert("✅ Absensi berhasil"); location.reload(); })
+  .catch(()=> { alert("❌ Gagal mengirim data"); btn.disabled=false; btn.innerText="SIMPAN"; });
 }
