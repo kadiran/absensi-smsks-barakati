@@ -216,3 +216,4 @@ doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 36);
 
 
 
+
