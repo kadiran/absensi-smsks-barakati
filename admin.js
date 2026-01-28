@@ -193,13 +193,21 @@ async function cetakPDF(){
   });
 
   // ===== TTD =====
-  const y = doc.lastAutoTable.finalY + 15;
-  const tgl = new Date().toLocaleDateString("id-ID");
+  // ===== TANDA TANGAN KEPALA SEKOLAH =====
+const y = doc.lastAutoTable.finalY + 15;
 
-  doc.text("Muna Barat, " + tgl, 140, y);
-  doc.text("Kepala Sekolah,", 140, y+10);
-  doc.setFont("times","bold");
-  doc.text("Muhammad Ali", 140, y+30);
+doc.setFont("times","normal");
+doc.setFontSize(10);
+
+doc.text("Bungkolo, 29 Januari 2026", 140, y);
+doc.text("Mengetahui,", 140, y + 7);
+doc.text("Kepala Sekolah", 140, y + 14);
+
+// ruang tanda tangan
+doc.text("Muhammad Ali", 140, y + 35);
+doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 42);
+
 
   doc.save("Rekap_Absensi_SMKS_Barakati.pdf");
 }
+
