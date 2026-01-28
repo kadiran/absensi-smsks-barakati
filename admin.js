@@ -200,8 +200,8 @@ doc.setFont("times","normal");
 doc.setFontSize(12);
 
 doc.text("Bungkolo, 29 Januari 2026", 140, y);
-doc.text("Mengetahui,", 140, y + 4);
-doc.text("Kepala Sekolah", 140, y + 8);
+doc.text("Mengetahui,", 140, y + 6);
+doc.text("Kepala Sekolah", 140, y + 10);
 
 // area tanda tangan (dipadatkan)
 doc.text("Muhammad Ali", 140, y + 22);
@@ -210,6 +210,7 @@ doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 26);
 
   doc.save("Rekap_Absensi_SMKS_Barakati.pdf");
 }
+
 
 
 
