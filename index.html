@@ -3,75 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Absensi Online SMSKS</title>
-<link rel="stylesheet" href="style.css">
-</head>
+<title>Login Admin Absensi SMKS Barakati</title>
 
+<style>
+  body { font-family: Arial, sans-serif; margin:20px; text-align:center; }
+  h1 { margin-bottom:20px; }
+  input { width:250px; padding:8px; margin:5px 0; }
+  button { padding:8px 20px; margin-top:10px; }
+  #loading { margin-top:10px; font-style:italic; }
+</style>
+</head>
 <body>
 
-<header>
-  <img src="logo.png" width="80" alt="Logo Sekolah"><br>
-  <b>ABSENSI ONLINE</b><br>
-  SMSKS Barakati Muna Barat
-</header>
+<h1>Login Admin Absensi</h1>
 
-<div class="container">
+<input type="text" id="user" placeholder="Username admin"><br>
+<input type="password" id="pass" placeholder="Password admin"><br>
+<button onclick="login()">LOGIN</button>
 
-  <label>Jenis Pegawai <small>*</small></label>
-  <select id="jenis">
-    <option value="">-- Pilih --</option>
-    <option>Kepala Sekolah</option>
-    <option>Guru</option>
-    <option>Guru Mapel</option>
-    <option>TU</option>
-  </select>
+<div id="loading" style="display:none">⏳ Memuat data...</div>
 
-  <label>Status Kepegawaian <small>*</small></label>
-  <select id="status_kepegawaian">
-    <option value="">-- Pilih --</option>
-    <option>PNS</option>
-    <option>PPPK</option>
-    <option>PPPK Paruh Waktu</option>
-    <option>GTY</option>
-    <option>PTY</option>
-    <option>Honor Sekolah</option>
-  </select>
+<script src="admin.js"></script>
 
-  <label>NIP / NIK <small>*</small></label>
-  <input id="nik" placeholder="Masukkan NIP / NIK">
+<script>
+function login() {
+  const user = document.getElementById("user").value.trim();
+  const pass = document.getElementById("pass").value.trim();
+  if(!user || !pass){ alert("❗ Username & password wajib diisi"); return; }
 
-  <label>Nama <small>*</small></label>
-  <input id="nama" placeholder="Masukkan nama lengkap">
+  document.getElementById("loading").style.display="block";
 
-  <label>Status Kehadiran <small>*</small></label>
-  <select id="status">
-    <option value="">-- Pilih --</option>
-    <option value="Hadir">Hadir</option>
-    <option value="Sakit">Sakit</option>
-    <option value="Izin">Izin</option>
-  </select>
+  fetch(`${API_URL}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`)
+    .then(r=>r.json())
+    .then(res=>{
+      document.getElementById("loading").style.display="none";
+      if(res.status==="ok"){
+        // simpan session sederhana
+        localStorage.setItem("adminUser", user);
+        window.location.href = "admin.html";
+      } else {
+        alert("❌ Login admin gagal");
+      }
+    })
+    .catch(()=>{ alert("❌ Tidak dapat terhubung ke server"); document.getElementById("loading").style.display="none"; });
+}
+</script>
 
-  <label>Keterangan (Wajib jika Sakit / Izin)</label>
-  <textarea id="keterangan" placeholder="Isi jika Sakit/Izin"></textarea>
-
-  <label>Foto Selfie <small>*</small></label>
-  <video id="video" autoplay playsinline></video>
-  <button type="button" onclick="ambilFoto()">📸 Ambil Foto</button>
-  <canvas id="foto" hidden></canvas>
-  <img id="hasilFoto">
-
-  <label>Tanda Tangan <small>*</small></label>
-  <canvas id="ttd" width="300" height="200"></canvas>
-  <button type="button" onclick="hapusTTD()">✍️ Ulangi TTD</button>
-
-  <label>Lokasi GPS <small>*</small></label>
-  <input id="lokasi" readonly>
-  <button type="button" onclick="ambilLokasi()">📍 Ambil Lokasi</button>
-
-  <button type="button" onclick="kirim(this)">✅ SIMPAN ABSENSI</button>
-
-</div>
-
-<script src="script.js"></script>
 </body>
 </html>
