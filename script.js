@@ -12,7 +12,7 @@ const fotoCanvas = document.getElementById("foto");
 const ttd = document.getElementById("ttd");
 const ctxTTD = ttd.getContext("2d");
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxSEZ5HSpNAio_FbDCWFfZR8-5zv7cd-K-tm7O8IGVpN4LiKPZU01JlnOM5g7Vbaxl1/exec"; // ganti dengan URL Script Google Sheet Anda
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwIsnsQIdCDHgOW6cglp3gY-Y901xjFRZ1ICY6FUcK-EpdBEjeJVdlyHUPe5_UQozou/exec"; // ganti dengan URL Script Google Sheet Anda
 
 // CAMERA
 navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
@@ -95,5 +95,6 @@ function kirim(btn) {
   .then(()=> { alert("✅ Absensi berhasil"); location.reload(); })
   .catch(()=> { alert("❌ Gagal mengirim data"); btn.disabled=false; btn.innerText="SIMPAN"; });
 }
+
 
 
