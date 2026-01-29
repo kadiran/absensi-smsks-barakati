@@ -3,17 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Absensi SMSKS</title>
+<title>Admin Absensi SMKS Barakati</title>
 
-<link rel="stylesheet" href="style.css">
+<!-- CSS sederhana -->
+<style>
+  body { font-family: Arial, sans-serif; margin:20px; }
+  header { font-size:18px; font-weight:bold; margin-bottom:10px; text-align:center; }
+  .container { max-width: 900px; margin:auto; }
+  label { display:block; margin-top:10px; font-weight:bold; }
+  input, select { width:100%; padding:5px; margin-top:5px; }
+  button { margin-top:10px; padding:7px 15px; }
+  table { width:100%; border-collapse:collapse; margin-top:15px; }
+  table, th, td { border:1px solid #000; }
+  th, td { padding:5px; text-align:center; font-size:12px; }
+  #loading { margin-top:10px; font-style:italic; }
+</style>
 
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
 </head>
 <body>
 
-<header>ADMIN ABSENSI ONLINE SMSKS BARAKATI</header>
+<header>ADMIN ABSENSI ONLINE SMKS BARAKATI</header>
 
 <div class="container">
 
@@ -24,8 +37,7 @@
   <label>Password Admin</label>
   <input type="password" id="pass" placeholder="Masukkan password admin">
 
-  <button class="btn btn-primary" onclick="login()">LOGIN</button>
-
+  <button onclick="login()">LOGIN</button>
   <div id="loading" style="display:none">⏳ Memuat data...</div>
 
   <!-- PANEL ADMIN -->
@@ -42,8 +54,6 @@
     <select id="filterNama">
       <option value="">Semua</option>
     </select>
-
-    <br><br>
 
     <button onclick="tampilkan()">🔍 Tampilkan</button>
     <button onclick="refreshData()">🔄 Refresh</button>
@@ -65,6 +75,8 @@
 
 </div>
 
+<!-- Admin JS Final -->
 <script src="admin.js"></script>
+
 </body>
 </html>
