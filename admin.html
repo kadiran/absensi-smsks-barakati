@@ -1,70 +1,25 @@
-﻿<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Absensi SMSKS</title>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">LOGIN</button>
 
-<link rel="stylesheet" href="style.css">
+<div id="loading" style="display:none">⏳ Memuat...</div>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-</head>
-<body>
+<div id="panel" style="display:none">
+  <h3 id="roleInfo"></h3>
 
-<header>ADMIN ABSENSI ONLINE SMSKS BARAKATI</header>
+  <select id="bulan"></select>
+  <input id="tahun" type="number" value="2026">
+  <button onclick="tampilkan()">Tampilkan</button>
+  <button onclick="cetakPDF()">Cetak PDF</button>
 
-<div class="container">
-
-  <!-- LOGIN -->
-  <label>Username</label>
-  <input type="text" id="user" placeholder="Username admin">
-
-  <label>Password Admin</label>
-  <input type="password" id="pass" placeholder="Masukkan password admin">
-
-  <button class="btn btn-primary" onclick="login()">LOGIN</button>
-
-  <div id="loading" style="display:none">⏳ Memuat data...</div>
-
-  <!-- PANEL ADMIN -->
-  <div id="panel" style="display:none">
-    <hr>
-
-    <label>Bulan</label>
-    <select id="bulan"></select>
-
-    <label>Tahun</label>
-    <input id="tahun" type="number" value="2026">
-
-    <label>Nama</label>
-    <select id="filterNama">
-      <option value="">Semua</option>
-    </select>
-
-    <br><br>
-
-    <button onclick="tampilkan()">🔍 Tampilkan</button>
-    <button onclick="refreshData()">🔄 Refresh</button>
-    <button onclick="cetakPDF()">🖨️ CETAK PDF BULANAN</button>
-
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Tanggal</th>
-          <th>Nama</th>
-          <th>Status Kehadiran</th>
-          <th>Keterangan</th>
-        </tr>
-      </thead>
-      <tbody id="data"></tbody>
-    </table>
-  </div>
-
+  <table border="1">
+    <thead>
+      <tr>
+        <th>No</th><th>Tanggal</th><th>Nama</th><th>Status</th><th>Keterangan</th>
+      </tr>
+    </thead>
+    <tbody id="data"></tbody>
+  </table>
 </div>
 
 <script src="admin.js"></script>
-</body>
-</html>
