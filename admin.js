@@ -3,18 +3,17 @@ alert("ADMIN JS FINAL PROFESIONAL AKTIF");
 // ===============================
 // LOGO BASE64 AMAN
 // ===============================
-const LOGO_KIRI_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABgCAIAAAAbwFLkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAEA9SURB...";
-const LOGO_KANAN_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOgAAADaCAYAAACsGw7eAAAQAElEQVR4Aez9B7xl2XXeB/73iTffl3PlHLuqK3VVp2pU5wYaQBOBQaREi+KMZM/II0sz47E9...";
+const LOGO_KIRI_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABg..."; // Ganti sesuai Base64
+const LOGO_KANAN_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOgAAADa..."; // Ganti sesuai Base64
 
 // ===============================
 // KONFIGURASI API
 // ===============================
 const API_URL = "https://script.google.com/macros/s/AKfycbyvAOO76Gwf27nhF9mTJZ_H62VFiGC--ffeG8DHT2N2w2E11MF9NL4d21HeXU6KKfNp/exec";
-
 let allData = [];
 
 // ================= LOGIN =================
-function login(){
+function login() {
   const user = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
 
@@ -33,7 +32,6 @@ function login(){
         document.getElementById("loading").style.display = "none";
         return;
       }
-
       document.getElementById("panel").style.display = "block";
       initBulan();
       loadData();
@@ -45,49 +43,40 @@ function login(){
 }
 
 // ================= BULAN =================
-function initBulan(){
+function initBulan() {
   const bulan = document.getElementById("bulan");
-  const namaBulan = [
-    "Januari","Februari","Maret","April","Mei","Juni",
-    "Juli","Agustus","September","Oktober","November","Desember"
-  ];
-
+  const namaBulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  
   bulan.innerHTML = "";
-  namaBulan.forEach((b,i)=>{
-    bulan.innerHTML += `<option value="${i+1}">${b}</option>`;
-  });
-
+  namaBulan.forEach((b,i)=>bulan.innerHTML += `<option value="${i+1}">${b}</option>`);
   bulan.value = new Date().getMonth()+1;
 }
 
 // ================= LOAD DATA =================
-function loadData(){
+function loadData() {
   fetch(API_URL + "?action=admin")
-    .then(r=>r.json())
-    .then(data=>{
+    .then(r => r.json())
+    .then(data => {
       allData = data;
       isiFilterNama();
       tampilkan();
       document.getElementById("loading").style.display = "none";
     })
-    .catch(()=>{
+    .catch(() => {
       alert("❌ Gagal memuat data");
       document.getElementById("loading").style.display = "none";
     });
 }
 
 // ================= FILTER NAMA =================
-function isiFilterNama(){
+function isiFilterNama() {
   const f = document.getElementById("filterNama");
   f.innerHTML = `<option value="">Semua</option>`;
-
-  [...new Set(allData.map(d=>d.nama))].forEach(n=>{
-    f.innerHTML += `<option value="${n}">${n}</option>`;
-  });
+  [...new Set(allData.map(d=>d.nama))].forEach(n=>f.innerHTML += `<option value="${n}">${n}</option>`);
 }
 
 // ================= TAMPILKAN =================
-function tampilkan(){
+function tampilkan() {
   const bulan = parseInt(document.getElementById("bulan").value);
   const tahun = parseInt(document.getElementById("tahun").value);
   const nama = document.getElementById("filterNama").value;
@@ -96,14 +85,9 @@ function tampilkan(){
   tbody.innerHTML = "";
   let no = 1;
 
-  allData.forEach(d=>{
+  allData.forEach(d => {
     const t = new Date(d.waktu);
-
-    if(
-      t.getMonth()+1 === bulan &&
-      t.getFullYear() === tahun &&
-      (nama === "" || d.nama === nama)
-    ){
+    if(t.getMonth()+1 === bulan && t.getFullYear() === tahun && (nama === "" || d.nama === nama)){
       tbody.innerHTML += `
         <tr>
           <td>${no++}</td>
@@ -111,41 +95,39 @@ function tampilkan(){
           <td>${d.nama}</td>
           <td>${d.status}</td>
           <td>${d.keterangan || "-"}</td>
-        </tr>
-      `;
+        </tr>`;
     }
   });
 }
 
 // ================= REFRESH =================
-function refreshData(){
+function refreshData() {
   document.getElementById("loading").style.display = "block";
   loadData();
 }
 
 // ================= HITUNG REKAP BULANAN =================
-function hitungRekapBulanan(){
+function hitungRekapBulanan() {
   const bulan = parseInt(document.getElementById("bulan").value);
   const tahun = parseInt(document.getElementById("tahun").value);
-
   const rekap = {};
+
   allData.forEach(d=>{
     const t = new Date(d.waktu);
     if(t.getMonth()+1 === bulan && t.getFullYear() === tahun){
-      if(!rekap[d.nama]) rekap[d.nama] = {Hadir:0, Sakit:0, Izin:0, Alfa:0};
-      if(d.status === "Hadir") rekap[d.nama].Hadir++;
-      else if(d.status === "Sakit") rekap[d.nama].Sakit++;
-      else if(d.status === "Izin") rekap[d.nama].Izin++;
+      if(!rekap[d.nama]) rekap[d.nama] = {Hadir:0,Sakit:0,Izin:0,Alfa:0};
+      if(d.status==="Hadir") rekap[d.nama].Hadir++;
+      else if(d.status==="Sakit") rekap[d.nama].Sakit++;
+      else if(d.status==="Izin") rekap[d.nama].Izin++;
       else rekap[d.nama].Alfa++;
     }
   });
-
   return rekap;
 }
 
 // ================= CETAK PDF RESMI =================
-function cetakPDF(){
-  if(document.querySelectorAll("#data tr").length === 0){
+function cetakPDF() {
+  if(document.querySelectorAll("#data tr").length===0){
     alert("❗ Data kosong, tidak bisa dicetak");
     return;
   }
@@ -158,27 +140,18 @@ function cetakPDF(){
   doc.addImage(LOGO_KANAN_BASE64,"PNG",175,10,20,20);
 
   // ===== KOP SEKOLAH =====
-  doc.setFont("times","bold");
-  doc.setFontSize(12);
+  doc.setFont("times","bold").setFontSize(12);
   doc.text("PEMERINTAH PROVINSI SULAWESI TENGGARA",105,15,{align:"center"});
   doc.text("DINAS PENDIDIKAN DAN KEBUDAYAAN",105,21,{align:"center"});
   doc.text("SEKOLAH MENENGAH KEJURUAN",105,27,{align:"center"});
-  doc.setFontSize(14);
-  doc.text("SMKS BARAKATI MUNA BARAT",105,33,{align:"center"});
+  doc.setFontSize(14).text("SMKS BARAKATI MUNA BARAT",105,33,{align:"center"});
 
-  doc.setFont("times","normal");
-  doc.setFontSize(9);
-  doc.text(
-    "Jl. Pendidikan Desa Bungkolo, Kecamatan Barangka, Kabupaten Muna Barat\n" +
-    "Telp/Hp. 0821 9613 6833 | Email: smk.barakati@yahoo.com",
-    105,40,{align:"center"}
-  );
-
+  doc.setFont("times","normal").setFontSize(9);
+  doc.text("Jl. Pendidikan Desa Bungkolo, Kecamatan Barangka, Kabupaten Muna Barat\nTelp/Hp. 0821 9613 6833 | Email: smk.barakati@yahoo.com",105,40,{align:"center"});
   doc.line(15,45,195,45);
 
   // ===== JUDUL =====
-  doc.setFont("times","bold");
-  doc.setFontSize(12);
+  doc.setFont("times","bold").setFontSize(12);
   doc.text("REKAP ABSENSI BULANAN",105,55,{align:"center"});
 
   // ===== TABEL ABSENSI DETAIL =====
@@ -191,28 +164,24 @@ function cetakPDF(){
 
   // ===== TABEL REKAP KEHADIRAN =====
   const rekap = hitungRekapBulanan();
-  const bodyRekap = Object.keys(rekap).map((nama, idx)=>{
-    const r = rekap[nama];
-    return [idx+1,nama,r.Hadir,r.Sakit,r.Izin,r.Alfa];
-  });
+  const bodyRekap = Object.keys(rekap).map((nama,idx)=>[idx+1,nama,rekap[nama].Hadir,rekap[nama].Sakit,rekap[nama].Izin,rekap[nama].Alfa]);
 
   const yRekap = doc.lastAutoTable.finalY + 10;
-  doc.setFont("times","bold");
-  doc.setFontSize(11);
+  doc.setFont("times","bold").setFontSize(11);
   doc.text("Rekap Jumlah Kehadiran per Bulan",105,yRekap,{align:"center"});
 
   doc.autoTable({
     startY: yRekap+5,
     head:[["No","Nama","Hadir","Sakit","Izin","Alfa"]],
-    body: bodyRekap,
+    body:bodyRekap,
     styles:{fontSize:9}
   });
 
   // ===== TTD =====
   const yTTD = doc.lastAutoTable.finalY + 10;
-  const bulan = document.getElementById("bulan").value;
-  const tahun = document.getElementById("tahun").value;
-  doc.setFont("times","normal");
+  const bulan = parseInt(document.getElementById("bulan").value);
+  const tahun = parseInt(document.getElementById("tahun").value);
+  doc.setFont("times","normal").setFontSize(10);
   doc.text(`Bungkolo, ${tanggalFormat(bulan,tahun)}`,140,yTTD);
   doc.text("Mengetahui,",140,yTTD+6);
   doc.text("Kepala Sekolah,",140,yTTD+12);
