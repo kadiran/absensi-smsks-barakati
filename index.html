@@ -3,77 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Absensi SMKS Barakati</title>
-
-<style>
-  body { font-family: Arial, sans-serif; margin:20px; }
-  header { font-size:18px; font-weight:bold; margin-bottom:10px; text-align:center; }
-  .container { max-width: 900px; margin:auto; }
-  label { display:block; margin-top:10px; font-weight:bold; }
-  input, select { width:100%; padding:5px; margin-top:5px; }
-  button { margin-top:10px; padding:7px 15px; }
-  table { width:100%; border-collapse:collapse; margin-top:15px; }
-  table, th, td { border:1px solid #000; }
-  th, td { padding:5px; text-align:center; font-size:12px; }
-  #loading { margin-top:10px; font-style:italic; }
-</style>
-
-<!-- jsPDF + AutoTable UMD terbaru -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.umd.min.js"></script>
-
+<title>Absensi Online SMSKS</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header>ADMIN ABSENSI ONLINE SMKS BARAKATI</header>
+<header>
+  <img src="logo.png" width="80" alt="Logo Sekolah"><br>
+  <b>ABSENSI ONLINE</b><br>
+  SMSKS Barakati Muna Barat
+</header>
 
 <div class="container">
 
-  <!-- LOGIN -->
-  <label>Username</label>
-  <input type="text" id="user" placeholder="Username admin">
+  <label>Jenis Pegawai <small>*</small></label>
+  <select id="jenis">
+    <option value="">-- Pilih --</option>
+    <option>Kepala Sekolah</option>
+    <option>Guru</option>
+    <option>Guru Mapel</option>
+    <option>TU</option>
+  </select>
 
-  <label>Password Admin</label>
-  <input type="password" id="pass" placeholder="Masukkan password admin">
+  <label>Status Kepegawaian <small>*</small></label>
+  <select id="status_kepegawaian">
+    <option value="">-- Pilih --</option>
+    <option>PNS</option>
+    <option>PPPK</option>
+    <option>PPPK Paruh Waktu</option>
+    <option>GTY</option>
+    <option>PTY</option>
+    <option>Honor Sekolah</option>
+  </select>
 
-  <button onclick="login()">LOGIN</button>
-  <div id="loading" style="display:none">⏳ Memuat data...</div>
+  <label>NIP / NIK <small>*</small></label>
+  <input id="nik" placeholder="Masukkan NIP / NIK">
 
-  <!-- PANEL ADMIN -->
-  <div id="panel" style="display:none">
-    <hr>
+  <label>Nama <small>*</small></label>
+  <input id="nama" placeholder="Masukkan nama lengkap">
 
-    <label>Bulan</label>
-    <select id="bulan"></select>
+  <label>Status Kehadiran <small>*</small></label>
+  <select id="status">
+    <option value="">-- Pilih --</option>
+    <option value="Hadir">Hadir</option>
+    <option value="Sakit">Sakit</option>
+    <option value="Izin">Izin</option>
+  </select>
 
-    <label>Tahun</label>
-    <input id="tahun" type="number" value="2026">
+  <label>Keterangan (Wajib jika Sakit / Izin)</label>
+  <textarea id="keterangan" placeholder="Isi jika Sakit/Izin"></textarea>
 
-    <label>Nama</label>
-    <select id="filterNama">
-      <option value="">Semua</option>
-    </select>
+  <label>Foto Selfie <small>*</small></label>
+  <video id="video" autoplay playsinline></video>
+  <button type="button" onclick="ambilFoto()">📸 Ambil Foto</button>
+  <canvas id="foto" hidden></canvas>
+  <img id="hasilFoto">
 
-    <button onclick="tampilkan()">🔍 Tampilkan</button>
-    <button onclick="refreshData()">🔄 Refresh</button>
-    <button onclick="cetakPDF()">🖨️ CETAK PDF BULANAN</button>
+  <label>Tanda Tangan <small>*</small></label>
+  <canvas id="ttd" width="300" height="200"></canvas>
+  <button type="button" onclick="hapusTTD()">✍️ Ulangi TTD</button>
 
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Tanggal</th>
-          <th>Nama</th>
-          <th>Status Kehadiran</th>
-          <th>Keterangan</th>
-        </tr>
-      </thead>
-      <tbody id="data"></tbody>
-    </table>
-  </div>
+  <label>Lokasi GPS <small>*</small></label>
+  <input id="lokasi" readonly>
+  <button type="button" onclick="ambilLokasi()">📍 Ambil Lokasi</button>
+
+  <button type="button" onclick="kirim(this)">✅ SIMPAN ABSENSI</button>
 
 </div>
 
-<script src="admin.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
