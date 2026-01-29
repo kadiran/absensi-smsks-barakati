@@ -1,4 +1,10 @@
-alert("ADMIN JS PROFESIONAL AKTIF");
+alert("ADMIN JS FINAL PROFESIONAL AKTIF");
+
+// ===============================
+// LOGO BASE64 AMAN
+// ===============================
+const LOGO_KIRI_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABgCAIAAAAbwFLkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAEA9SURB...";
+const LOGO_KANAN_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOgAAADaCAYAAACsGw7eAAAQAElEQVR4Aez9B7xl2XXeB/73iTffl3PlHLuqK3VVp2pU5wYaQBOBQaREi+KMZM/II0sz47E9...";
 
 // ===============================
 // KONFIGURASI API
@@ -7,25 +13,23 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyvAOO76Gwf27nhF9mTJZ_H
 
 let allData = [];
 
-// ===============================
-// LOGIN ADMIN
-// ===============================
+// ================= LOGIN =================
 function login(){
   const user = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
 
   if(!user || !pass){
-    alert("❗ Username dan password wajib diisi");
+    alert("❗ Username & password wajib diisi");
     return;
   }
 
   document.getElementById("loading").style.display = "block";
 
   fetch(`${API_URL}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`)
-    .then(res => res.json())
-    .then(data => {
-      if(data.status !== "ok"){
-        alert("❌ Login gagal");
+    .then(r => r.json())
+    .then(res => {
+      if(res.status !== "ok"){
+        alert("❌ Login admin gagal");
         document.getElementById("loading").style.display = "none";
         return;
       }
@@ -40,9 +44,7 @@ function login(){
     });
 }
 
-// ===============================
-// BULAN
-// ===============================
+// ================= BULAN =================
 function initBulan(){
   const bulan = document.getElementById("bulan");
   const namaBulan = [
@@ -55,63 +57,57 @@ function initBulan(){
     bulan.innerHTML += `<option value="${i+1}">${b}</option>`;
   });
 
-  bulan.value = new Date().getMonth() + 1;
+  bulan.value = new Date().getMonth()+1;
 }
 
-// ===============================
-// LOAD DATA ADMIN
-// ===============================
+// ================= LOAD DATA =================
 function loadData(){
   fetch(API_URL + "?action=admin")
-    .then(res => res.json())
-    .then(data => {
+    .then(r=>r.json())
+    .then(data=>{
       allData = data;
       isiFilterNama();
       tampilkan();
       document.getElementById("loading").style.display = "none";
     })
-    .catch(() => {
+    .catch(()=>{
       alert("❌ Gagal memuat data");
       document.getElementById("loading").style.display = "none";
     });
 }
 
-// ===============================
-// FILTER NAMA
-// ===============================
+// ================= FILTER NAMA =================
 function isiFilterNama(){
-  const filter = document.getElementById("filterNama");
-  filter.innerHTML = `<option value="">Semua</option>`;
+  const f = document.getElementById("filterNama");
+  f.innerHTML = `<option value="">Semua</option>`;
 
-  [...new Set(allData.map(d => d.nama))].forEach(nama => {
-    filter.innerHTML += `<option value="${nama}">${nama}</option>`;
+  [...new Set(allData.map(d=>d.nama))].forEach(n=>{
+    f.innerHTML += `<option value="${n}">${n}</option>`;
   });
 }
 
-// ===============================
-// TAMPILKAN DATA
-// ===============================
+// ================= TAMPILKAN =================
 function tampilkan(){
-  const bulan = document.getElementById("bulan").value;
-  const tahun = document.getElementById("tahun").value;
+  const bulan = parseInt(document.getElementById("bulan").value);
+  const tahun = parseInt(document.getElementById("tahun").value);
   const nama = document.getElementById("filterNama").value;
   const tbody = document.getElementById("data");
 
   tbody.innerHTML = "";
   let no = 1;
 
-  allData.forEach(d => {
-    const tgl = new Date(d.waktu);
+  allData.forEach(d=>{
+    const t = new Date(d.waktu);
 
     if(
-      (tgl.getMonth()+1 == bulan) &&
-      (tgl.getFullYear() == tahun) &&
+      t.getMonth()+1 === bulan &&
+      t.getFullYear() === tahun &&
       (nama === "" || d.nama === nama)
     ){
       tbody.innerHTML += `
         <tr>
           <td>${no++}</td>
-          <td>${tgl.toLocaleDateString("id-ID")}</td>
+          <td>${t.toLocaleDateString("id-ID")}</td>
           <td>${d.nama}</td>
           <td>${d.status}</td>
           <td>${d.keterangan || "-"}</td>
@@ -121,24 +117,35 @@ function tampilkan(){
   });
 }
 
-// ===============================
-// LOAD GAMBAR (LOGO)
-// ===============================
-function loadImage(src){
-  return new Promise((resolve, reject)=>{
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject("Logo tidak ditemukan");
-    img.src = src;
-  });
+// ================= REFRESH =================
+function refreshData(){
+  document.getElementById("loading").style.display = "block";
+  loadData();
 }
 
-// ===============================
-// CETAK PDF RESMI SEKOLAH
-// ===============================
-async function cetakPDF(){
-  const rows = document.querySelectorAll("#data tr");
-  if(rows.length === 0){
+// ================= HITUNG REKAP BULANAN =================
+function hitungRekapBulanan(){
+  const bulan = parseInt(document.getElementById("bulan").value);
+  const tahun = parseInt(document.getElementById("tahun").value);
+
+  const rekap = {};
+  allData.forEach(d=>{
+    const t = new Date(d.waktu);
+    if(t.getMonth()+1 === bulan && t.getFullYear() === tahun){
+      if(!rekap[d.nama]) rekap[d.nama] = {Hadir:0, Sakit:0, Izin:0, Alfa:0};
+      if(d.status === "Hadir") rekap[d.nama].Hadir++;
+      else if(d.status === "Sakit") rekap[d.nama].Sakit++;
+      else if(d.status === "Izin") rekap[d.nama].Izin++;
+      else rekap[d.nama].Alfa++;
+    }
+  });
+
+  return rekap;
+}
+
+// ================= CETAK PDF RESMI =================
+function cetakPDF(){
+  if(document.querySelectorAll("#data tr").length === 0){
     alert("❗ Data kosong, tidak bisa dicetak");
     return;
   }
@@ -146,11 +153,11 @@ async function cetakPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p","mm","a4");
 
-  // ================= LOGO (BASE64 - AMAN)
-  doc.addImage(LOGO_KIRI_BASE64, "PNG", 15, 10, 20, 20);
-  doc.addImage(LOGO_KANAN_BASE64, "PNG", 175, 10, 20, 20);
+  // ===== LOGO =====
+  doc.addImage(LOGO_KIRI_BASE64,"PNG",15,10,20,20);
+  doc.addImage(LOGO_KANAN_BASE64,"PNG",175,10,20,20);
 
-  // ================= KOP SEKOLAH
+  // ===== KOP SEKOLAH =====
   doc.setFont("times","bold");
   doc.setFontSize(12);
   doc.text("PEMERINTAH PROVINSI SULAWESI TENGGARA",105,15,{align:"center"});
@@ -169,59 +176,54 @@ async function cetakPDF(){
 
   doc.line(15,45,195,45);
 
-  // ================= JUDUL
+  // ===== JUDUL =====
   doc.setFont("times","bold");
   doc.setFontSize(12);
   doc.text("REKAP ABSENSI BULANAN",105,55,{align:"center"});
 
-  // ================= TABEL
+  // ===== TABEL ABSENSI DETAIL =====
   doc.autoTable({
-    startY: 60,
-    head: [["No","Tanggal","Nama","Status","Keterangan"]],
-    body: [...rows].map(tr =>
-      [...tr.children].map(td => td.innerText)
-    ),
-    styles:{ fontSize:9 }
+    startY:60,
+    head:[["No","Tanggal","Nama","Status","Keterangan"]],
+    body:[...document.querySelectorAll("#data tr")].map(tr => [...tr.children].map(td => td.innerText)),
+    styles:{fontSize:9}
   });
 
-  // ================= TANGGAL OTOMATIS SESUAI FILTER
-  const bulanNama = [
-    "Januari","Februari","Maret","April","Mei","Juni",
-    "Juli","Agustus","September","Oktober","November","Desember"
-  ];
+  // ===== TABEL REKAP KEHADIRAN =====
+  const rekap = hitungRekapBulanan();
+  const bodyRekap = Object.keys(rekap).map((nama, idx)=>{
+    const r = rekap[nama];
+    return [idx+1,nama,r.Hadir,r.Sakit,r.Izin,r.Alfa];
+  });
 
+  const yRekap = doc.lastAutoTable.finalY + 10;
+  doc.setFont("times","bold");
+  doc.setFontSize(11);
+  doc.text("Rekap Jumlah Kehadiran per Bulan",105,yRekap,{align:"center"});
+
+  doc.autoTable({
+    startY: yRekap+5,
+    head:[["No","Nama","Hadir","Sakit","Izin","Alfa"]],
+    body: bodyRekap,
+    styles:{fontSize:9}
+  });
+
+  // ===== TTD =====
+  const yTTD = doc.lastAutoTable.finalY + 10;
   const bulan = document.getElementById("bulan").value;
   const tahun = document.getElementById("tahun").value;
-
-  const tanggalCetak = `Bungkolo, 29 ${bulanNama[bulan-1]} ${tahun}`;
-
-  // ================= TANDA TANGAN (KANAN)
-  const y = doc.lastAutoTable.finalY + 12;
-
   doc.setFont("times","normal");
-  doc.setFontSize(10);
-  doc.text(tanggalCetak, 140, y);
-  doc.text("Mengetahui,", 140, y + 5);
-  doc.text("Kepala Sekolah", 140, y + 10);
+  doc.text(`Bungkolo, ${tanggalFormat(bulan,tahun)}`,140,yTTD);
+  doc.text("Mengetahui,",140,yTTD+6);
+  doc.text("Kepala Sekolah,",140,yTTD+12);
+  doc.text("Muhammad Ali",140,yTTD+24);
+  doc.text("NIP: 1234567890",140,yTTD+30);
 
-  // gambar tanda tangan
-  try{
-    doc.addImage("ttd_kepsek.png","PNG",138, y + 13, 40, 18);
-  }catch(e){
-    alert("❗ Gambar tanda tangan tidak ditemukan");
-  }
-
-  doc.text("Muhammad Ali", 140, y + 35);
-  doc.text("NIP. 1978xxxxxxxxxxxx", 140, y + 40);
-
-  // ================= SIMPAN
   doc.save("Rekap_Absensi_SMKS_Barakati.pdf");
 }
 
-
-
-
-
-
-
-
+// ================= HELPER =================
+function tanggalFormat(bulan,tahun){
+  const namaBulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  return `${namaBulan[bulan-1]} ${tahun}`;
+}
