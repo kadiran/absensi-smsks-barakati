@@ -1,25 +1,81 @@
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">LOGIN</button>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Absensi Online SMSKS Barakati</title>
 
-<div id="loading" style="display:none">⏳ Memuat...</div>
+<!-- CSS -->
+<link rel="stylesheet" href="style.css">
 
-<div id="panel" style="display:none">
-  <h3 id="roleInfo"></h3>
+<!-- jsPDF & AutoTable (WAJIB untuk cetak PDF) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
 
-  <select id="bulan"></select>
-  <input id="tahun" type="number" value="2026">
-  <button onclick="tampilkan()">Tampilkan</button>
-  <button onclick="cetakPDF()">Cetak PDF</button>
+<body>
 
-  <table border="1">
-    <thead>
-      <tr>
-        <th>No</th><th>Tanggal</th><th>Nama</th><th>Status</th><th>Keterangan</th>
-      </tr>
-    </thead>
-    <tbody id="data"></tbody>
-  </table>
+<header>
+  ADMIN ABSENSI ONLINE<br>
+  SMKS BARAKATI
+</header>
+
+<div class="container">
+
+  <!-- ================= LOGIN ================= -->
+  <div id="loginBox">
+    <label>Username</label>
+    <input type="text" id="user" placeholder="Masukkan username">
+
+    <label>Password</label>
+    <input type="password" id="pass" placeholder="Masukkan password">
+
+    <button class="btn btn-primary" onclick="login()">🔐 LOGIN</button>
+
+    <div id="loading" style="display:none;margin-top:10px">
+      ⏳ Menghubungkan ke server...
+    </div>
+  </div>
+
+  <!-- ================= PANEL ================= -->
+  <div id="panel" style="display:none">
+    <hr>
+
+    <h3 id="roleInfo"></h3>
+
+    <div class="filter-box">
+      <label>Bulan</label>
+      <select id="bulan"></select>
+
+      <label>Tahun</label>
+      <input type="number" id="tahun" value="2026">
+    </div>
+
+    <div class="action-box">
+      <button onclick="tampilkan()">🔍 Tampilkan</button>
+      <button onclick="refreshData()">🔄 Refresh</button>
+      <button onclick="cetakPDF()">🖨️ CETAK PDF BULANAN</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Tanggal</th>
+          <th>Nama</th>
+          <th>Status Kehadiran</th>
+          <th>Keterangan</th>
+        </tr>
+      </thead>
+      <tbody id="data"></tbody>
+    </table>
+  </div>
+
 </div>
 
+<!-- ================= SCRIPT ================= -->
+<!-- TIDAK IMPORT APA PUN LAGI -->
 <script src="admin.js"></script>
+
+</body>
+</html>
